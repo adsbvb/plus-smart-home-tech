@@ -1,28 +1,32 @@
 package ru.yandex.practicum.model;
 
+import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.util.List;
+
 @Getter
 @Setter
 @ToString(callSuper = true)
 @NotNull
-public class ClimateSensorEvent extends SensorEvent{
+public class ScenarioAddedEvent extends HubEvent {
 
     @NotBlank
-    int temperatureC;
+    @Min(3)
+    private String name;
 
     @NotNull
-    int humidity;
+    List<ScenarioCondition> conditions;
 
     @NotNull
-    int co2Level;
+    List<DeviceAction> actions;
 
     @Override
-    public SensorEventType getType() {
-        return SensorEventType.CLIMATE_SENSOR_EVENT;
+    public HubEventType getType() {
+        return HubEventType.SCENARIO_ADDED;
     }
 }

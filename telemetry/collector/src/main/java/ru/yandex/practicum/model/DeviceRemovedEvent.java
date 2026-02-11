@@ -10,19 +10,13 @@ import lombok.ToString;
 @Setter
 @ToString(callSuper = true)
 @NotNull
-public class ClimateSensorEvent extends SensorEvent{
+public class DeviceRemovedEvent extends HubEvent {
 
     @NotBlank
-    int temperatureC;
-
-    @NotNull
-    int humidity;
-
-    @NotNull
-    int co2Level;
+    private String id;
 
     @Override
-    public SensorEventType getType() {
-        return SensorEventType.CLIMATE_SENSOR_EVENT;
+    public HubEventType getType() {
+        return HubEventType.DEVICE_REMOVED;
     }
 }
