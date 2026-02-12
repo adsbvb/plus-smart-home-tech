@@ -2,19 +2,19 @@ package ru.yandex.practicum.service.handler;
 
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.model.HubEvent;
+import ru.yandex.practicum.model.SensorEvent;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
-public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
+public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
 
     private final KafkaEventProducer producer;
 
-    protected BaseHubEventHandler(KafkaEventProducer producer) {
+    protected BaseSensorEventHandler(KafkaEventProducer producer) {
         this.producer = producer;
     }
 
     @Override
-    public void handle(HubEvent event) {
+    public void handle(SensorEvent event) {
         // Проверка соответсвия типа события ожидаемому типу обрботчика
         if (!event.getType().equals(getMessageType())) {
             throw new IllegalArgumentException("Неизветсный тип события: " + event.getType());
@@ -29,8 +29,8 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
                 .setPayload(payload)
                 .build();
 
-        producer.send(eventAvro, event.getHubId(), event.getTimestamp(), HUBS_EVENTS);
+        producer.send(eventAvro, event.getHubId(), event.getTimestamp(), SENSOR_EVENTS);
     }
 
-    public abstract T mapToAvro(HubEvent event);
+    public abstract T mapToAvro(SensorEvent event);
 }

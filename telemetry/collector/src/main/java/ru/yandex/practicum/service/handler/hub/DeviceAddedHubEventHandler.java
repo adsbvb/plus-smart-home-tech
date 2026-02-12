@@ -7,6 +7,7 @@ import ru.yandex.practicum.model.DeviceAddedEvent;
 import ru.yandex.practicum.model.HubEvent;
 import ru.yandex.practicum.model.HubEventType;
 import ru.yandex.practicum.service.handler.BaseHubEventHandler;
+import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 @Component(value = "DEVICE_ADDED")
 public class DeviceAddedHubEventHandler extends BaseHubEventHandler<DeviceAddedEventAvro> {
@@ -19,8 +20,9 @@ public class DeviceAddedHubEventHandler extends BaseHubEventHandler<DeviceAddedE
     public HubEventType getMessageType() {
         return HubEventType.DEVICE_ADDED;
     }
+
     @Override
-    public DeviceAddedEvent mapToAvro(HubEvent event) {
+    public DeviceAddedEventAvro mapToAvro(HubEvent event) {
         DeviceAddedEvent deviceAddedEvent = (DeviceAddedEvent) event;
         return DeviceAddedEventAvro.newBuilder()
                 .setId(deviceAddedEvent.getId())
