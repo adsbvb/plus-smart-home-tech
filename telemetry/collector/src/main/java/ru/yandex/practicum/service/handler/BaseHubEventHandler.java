@@ -1,17 +1,17 @@
 package ru.yandex.practicum.service.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.model.HubEvent;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
+import static ru.yandex.practicum.configuration.KafkaConfig.HUBS_EVENTS;
+
+@RequiredArgsConstructor
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
 
     private final KafkaEventProducer producer;
-
-    protected BaseHubEventHandler(KafkaEventProducer producer) {
-        this.producer = producer;
-    }
 
     @Override
     public void handle(HubEvent event) {

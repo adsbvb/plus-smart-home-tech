@@ -1,17 +1,17 @@
 package ru.yandex.practicum.service.handler;
 
+import lombok.RequiredArgsConstructor;
 import org.apache.avro.specific.SpecificRecordBase;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.model.SensorEvent;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
+import static ru.yandex.practicum.configuration.KafkaConfig.SENSOR_EVENTS;
+
+@RequiredArgsConstructor
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
 
     private final KafkaEventProducer producer;
-
-    protected BaseSensorEventHandler(KafkaEventProducer producer) {
-        this.producer = producer;
-    }
 
     @Override
     public void handle(SensorEvent event) {
@@ -29,7 +29,6 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
                 .setTimestamp(event.getTimestamp())
                 .setPayload(payload)
                 .build();
-
         producer.send(eventAvro, event.getHubId(), event.getTimestamp(), SENSOR_EVENTS);
     }
 
