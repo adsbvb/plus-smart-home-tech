@@ -1,7 +1,7 @@
 package ru.yandex.practicum.service.handler;
 
 import org.apache.avro.specific.SpecificRecordBase;
-import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.model.SensorEvent;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
@@ -23,7 +23,8 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         // Преобразование событие в Avro-запись
         T payload = mapToAvro(event);
 
-        HubEventAvro eventAvro = HubEventAvro.newBuilder()
+        SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
+                .setId(event.getId())
                 .setHubId(event.getHubId())
                 .setTimestamp(event.getTimestamp())
                 .setPayload(payload)
