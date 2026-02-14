@@ -9,5 +9,5 @@ public class KafkaConfig {
     // configurations
     public static final String BOOTSTRAP_SERVERS = "localhost:9092";
     public static final String KEY_SERIALIZER_CLASS = "org.apache.kafka.common.serialization.StringSerializer";
-    public static final String VALUE_SERIALIZER_CLASS =  "ru.yandex.practicum.kafka.serializer";
+    public static final String VALUE_SERIALIZER_CLASS =  "ru.yandex.practicum.kafka.serializer.GeneralAvroSerializer";
 }

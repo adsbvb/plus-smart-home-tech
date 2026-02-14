@@ -15,7 +15,6 @@ public class ErrorResponse {
     // Сведения об ошибке
     List<String> errors;
     String message;
-    String reason;
     String status;
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")

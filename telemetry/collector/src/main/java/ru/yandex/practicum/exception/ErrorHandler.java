@@ -22,7 +22,6 @@ public class ErrorHandler {
         log.error("400 {}", e.getMessage(), e);
         return ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
-                .reason("Неправильно оформленный запрос")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
@@ -34,7 +33,6 @@ public class ErrorHandler {
         log.error("400 {}", e.getMessage(), e);
         return ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
-                .reason("Неправильно оформленный запрос")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
@@ -46,7 +44,6 @@ public class ErrorHandler {
         log.error("400 {}", e.getMessage(), e);
         return ErrorResponse.builder()
                 .status(HttpStatus.BAD_REQUEST.toString())
-                .reason("Неправильно оформленный запрос")
                 .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
@@ -58,8 +55,7 @@ public class ErrorHandler {
         log.error("Unexpected error: {}", e.getMessage(), e);
         return ErrorResponse.builder()
                 .status(HttpStatus.INTERNAL_SERVER_ERROR.toString())
-                .reason("Internal server error")
-                .message("Internal server error")
+                .message(e.getMessage())
                 .timestamp(LocalDateTime.now().format(FORMATTER))
                 .build();
     }

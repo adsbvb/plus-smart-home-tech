@@ -12,13 +12,13 @@ import lombok.ToString;
 public class MotionSensorEvent extends SensorEvent {
 
     @NotNull
-    int linkQuality;
+    private Integer linkQuality;
 
     @NotNull
-    boolean motion;
+    private Boolean motion;
 
     @NotNull
-    int voltage;
+    private Integer voltage;
 
     @Override
     public SensorEventType getType() {

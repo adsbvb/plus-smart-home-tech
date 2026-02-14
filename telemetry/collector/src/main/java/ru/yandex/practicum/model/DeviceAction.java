@@ -11,9 +11,9 @@ import lombok.ToString;
 @NotNull
 public class DeviceAction {
 
-    String sensorId;
+    private String sensorId;
 
-    ActionType type;
+    private ActionType type;
 
-    int value;
+    private Integer value;
 }

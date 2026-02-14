@@ -15,7 +15,7 @@ public class ScenarioRemovedEvent extends HubEvent {
 
     @NotBlank
     @Min(3)
-    String name;
+    private String name;
 
     @Override
     public HubEventType getType() {

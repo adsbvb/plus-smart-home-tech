@@ -1,5 +1,6 @@
 package ru.yandex.practicum.service.handler.sensor;
 
+import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.ClimateSensorAvro;
 import ru.yandex.practicum.model.ClimateSensorEvent;
 import ru.yandex.practicum.model.SensorEvent;
@@ -7,6 +8,7 @@ import ru.yandex.practicum.model.SensorEventType;
 import ru.yandex.practicum.service.handler.BaseSensorEventHandler;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
+@Component
 public class ClimateSensorEventHandler extends BaseSensorEventHandler<ClimateSensorAvro> {
 
     protected ClimateSensorEventHandler(KafkaEventProducer producer) {

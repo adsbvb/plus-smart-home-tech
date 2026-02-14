@@ -12,7 +12,7 @@ import lombok.ToString;
 public class SwitchSensorEvent extends SensorEvent {
 
     @NotNull
-    boolean state;
+    private Boolean state;
 
     @Override
     public SensorEventType getType() {

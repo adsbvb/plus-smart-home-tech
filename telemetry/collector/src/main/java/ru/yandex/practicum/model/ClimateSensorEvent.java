@@ -1,6 +1,5 @@
 package ru.yandex.practicum.model;
 
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,14 +11,14 @@ import lombok.ToString;
 @NotNull
 public class ClimateSensorEvent extends SensorEvent{
 
-    @NotBlank
-    int temperatureC;
+    @NotNull
+    private Integer temperatureC;
 
     @NotNull
-    int humidity;
+    private Integer humidity;
 
     @NotNull
-    int co2Level;
+    private Integer co2Level;
 
     @Override
     public SensorEventType getType() {

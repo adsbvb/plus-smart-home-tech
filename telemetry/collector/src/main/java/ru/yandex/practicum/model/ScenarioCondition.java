@@ -11,8 +11,8 @@ import lombok.ToString;
 @NotNull
 public class ScenarioCondition {
 
-    String sensorId;
-    ConditionType type;
-    ConditionOperation operation;
-    int value;
+    private String sensorId;
+    private ConditionType type;
+    private ConditionOperation operation;
+    private Integer value;
 }

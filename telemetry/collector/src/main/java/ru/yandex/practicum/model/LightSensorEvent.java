@@ -11,8 +11,8 @@ import lombok.ToString;
 @NotNull
 public class LightSensorEvent extends SensorEvent {
 
-    int linkQuality;
-    int luminosity;
+    private Integer linkQuality;
+    private Integer luminosity;
 
     @Override
     public SensorEventType getType() {
