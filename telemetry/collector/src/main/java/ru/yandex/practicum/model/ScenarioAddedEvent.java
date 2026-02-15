@@ -12,7 +12,6 @@ import java.util.List;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@NotNull
 public class ScenarioAddedEvent extends HubEvent {
 
     @NotBlank

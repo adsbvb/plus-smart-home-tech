@@ -8,7 +8,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@NotNull
 public class SwitchSensorEvent extends SensorEvent {
 
     @NotNull

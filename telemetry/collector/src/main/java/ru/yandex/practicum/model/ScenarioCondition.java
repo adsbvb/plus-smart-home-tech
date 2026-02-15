@@ -8,7 +8,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@NotNull
 public class ScenarioCondition {
 
     private String sensorId;

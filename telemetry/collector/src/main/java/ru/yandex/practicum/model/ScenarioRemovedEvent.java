@@ -10,7 +10,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@NotNull
 public class ScenarioRemovedEvent extends HubEvent {
 
     @NotBlank

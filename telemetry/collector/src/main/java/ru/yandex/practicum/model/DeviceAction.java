@@ -8,7 +8,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
-@NotNull
 public class DeviceAction {
 
     private String sensorId;

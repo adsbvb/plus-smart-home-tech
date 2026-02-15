@@ -8,7 +8,6 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString(callSuper = true)
-@NotNull
 public class LightSensorEvent extends SensorEvent {
 
     private Integer linkQuality;
