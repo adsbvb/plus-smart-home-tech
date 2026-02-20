@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.exception;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -19,4 +20,4 @@ public class ErrorResponse {
 
     @JsonFormat(pattern = "yyyy-MM-dd HH:mm:ss")
     String timestamp;
-}
+}*/

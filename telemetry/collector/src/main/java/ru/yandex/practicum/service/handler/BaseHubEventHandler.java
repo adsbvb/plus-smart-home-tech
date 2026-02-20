@@ -3,9 +3,11 @@ package ru.yandex.practicum.service.handler;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.model.HubEvent;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
+
+import java.time.Instant;
 
 import static ru.yandex.practicum.configuration.KafkaConfig.HUBS_EVENTS;
 
@@ -16,15 +18,15 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
     private final KafkaEventProducer producer;
 
     @Override
-    public void handle(HubEvent event) {
+    public void handle(HubEventProto event) {
         log.info("Тип события: {}, HubId: {}, Timestamp: {}",
-                event.getType(), event.getHubId(), event.getTimestamp());
+                event.getPayloadCase(), event.getHubId(), event.getTimestamp());
 
         // Проверка соответсвия типа события ожидаемому типу обрботчика
-        if (!event.getType().equals(getMessageType())) {
+        if (!event.getPayloadCase().equals(getMessageType())) {
             log.error("Несоответствие типа события. Ожидался: {}, получен: {}",
-                    getMessageType(), event.getType());
-            throw new IllegalArgumentException("Неизветсный тип события: " + event.getType());
+                    getMessageType(), event.getPayloadCase());
+            throw new IllegalArgumentException("Неизветсный тип события: " + event.getPayloadCase());
         }
 
         // Преобразование событие в Avro-запись
@@ -33,15 +35,16 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
 
         HubEventAvro eventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(
+                        event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(payload)
                 .build();
         log.debug("HubEventAvro создан, размер payload: {} байт",
                 payload != null ? payload.toString().length() : 0);
 
-        producer.send(eventAvro, event.getHubId(), event.getTimestamp(), HUBS_EVENTS);
+        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), HUBS_EVENTS);
         log.info("Отправлено в Kafka: topic={}, hubId={}", HUBS_EVENTS, event.getHubId());
     }
 
-    public abstract T mapToAvro(HubEvent event);
+    public abstract T mapToAvro(HubEventProto event);
 }
