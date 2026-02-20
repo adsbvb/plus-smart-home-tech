@@ -1,3 +1,4 @@
+/*
 package ru.yandex.practicum.exception;
 
 import jakarta.validation.ConstraintViolationException;
@@ -60,3 +61,4 @@ public class ErrorHandler {
                 .build();
     }
 }
+*/
