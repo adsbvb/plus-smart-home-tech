@@ -53,12 +53,6 @@ public class EventController extends CollectorControllerGrpc.CollectorController
 
     @Override
     public void collectHubEvent(HubEventProto request, StreamObserver<Empty> responseObserver) {
-       /* log.info("json: {}", request.toString());
-        HubEventHandler hubEventHandler = hubEventHandlers.get(request.getType());
-        if (hubEventHandler == null) {
-            throw new IllegalArgumentException("Не могу найти обработчик для события: " + request.getType());
-        }
-        hubEventHandler.handle(request);*/
         try {
             // проверяем, есть ли обработчик для полученного события
             if (hubEventHandlers.containsKey(request.getPayloadCase())) {
