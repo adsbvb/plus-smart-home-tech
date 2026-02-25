@@ -9,7 +9,6 @@ import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 import ru.yandex.practicum.mapper.EnumMapper;
-import ru.yandex.practicum.model.*;
 import ru.yandex.practicum.service.handler.BaseHubEventHandler;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
@@ -48,10 +47,8 @@ public class ScenarioAddedHubEventHandler extends BaseHubEventHandler<ScenarioAd
 
         return ScenarioConditionAvro.newBuilder()
                 .setSensorId(scenarioCondition.getSensorId())
-                .setType(EnumMapper.toConditionTypeAvro(
-                        ConditionType.valueOf(scenarioCondition.getType().name())))
-                .setOperation(EnumMapper.toConditionOperationTypeAvro(
-                        ConditionOperation.valueOf(scenarioCondition.getOperation().name())))
+                .setType(EnumMapper.toConditionTypeAvro(scenarioCondition.getType()))
+                .setOperation(EnumMapper.toConditionOperationTypeAvro(scenarioCondition.getOperation()))
                 .setValue(value)
                 .build();
     }
@@ -59,8 +56,7 @@ public class ScenarioAddedHubEventHandler extends BaseHubEventHandler<ScenarioAd
     private DeviceActionAvro mapToDeviceAction(DeviceActionProto deviceAction) {
         return DeviceActionAvro.newBuilder()
                 .setSensorId(deviceAction.getSensorId())
-                .setType(EnumMapper.toActionTypeAvro(
-                        ActionType.valueOf(deviceAction.getType().name())))
+                .setType(EnumMapper.toActionTypeAvro(deviceAction.getType()))
                 .setValue(deviceAction.getValue())
                 .build();
     }

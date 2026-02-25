@@ -5,7 +5,6 @@ import ru.yandex.practicum.grpc.telemetry.event.DeviceAddedEventProto;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.mapper.EnumMapper;
-import ru.yandex.practicum.model.DeviceType;
 import ru.yandex.practicum.service.handler.BaseHubEventHandler;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
@@ -26,8 +25,7 @@ public class DeviceAddedHubEventHandler extends BaseHubEventHandler<DeviceAddedE
         DeviceAddedEventProto deviceAddedEvent = event.getDeviceAdded();
         return DeviceAddedEventAvro.newBuilder()
                 .setId(deviceAddedEvent.getId())
-                .setType(EnumMapper.toDeviceTypeAvro(DeviceType.valueOf(
-                        event.getDeviceAdded().getType().name())))
+                .setType(EnumMapper.toDeviceTypeAvro(deviceAddedEvent.getType()))
                 .build();
     }
 }
