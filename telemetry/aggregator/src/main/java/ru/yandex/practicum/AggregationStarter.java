@@ -7,6 +7,7 @@ import org.apache.kafka.clients.consumer.ConsumerRecord;
 import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.clients.producer.Producer;
+import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
@@ -37,33 +38,25 @@ public class AggregationStarter {
 
     public void start() {
         Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
-
         try {
-
             consumer.subscribe(TOPICS);
-
             while (true) {
                 ConsumerRecords<String, SensorEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
                 int count = 0;
-
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     handleRecord(record);
                     manageOffsets(record, count, consumer);
                     count++;
                 }
             }
-
         } catch (WakeupException ignored) {
             // игнорируем - закрываем консьюмер и продюсер в блоке finally
         } catch (Exception e) {
             log.error("Ошибка во время обработки событий от датчиков", e);
         } finally {
-
             try {
-
                 consumer.commitSync(currentOffsets);
                 producer.flush();
-
             } finally {
                 log.info("Закрываем консьюмер");
                 consumer.close();
@@ -78,11 +71,23 @@ public class AggregationStarter {
             Optional<SensorsSnapshotAvro> snapshotOpt = snapshotAggregatorService.updateState(record.value());
             snapshotOpt.ifPresent(this::sendSnapshot);
         } catch (Exception e) {
-            log.error("Ошибка обработки записи {}: {} ",record.offset(), e.getMessage());
+            log.error("Ошибка обработки записи {}: {} ",record.offset(), e.getMessage(), e);
         }
     }
 
-    private void sendSnapshot(SensorsSnapshotAvro snapshot) {}
+    private void sendSnapshot(SensorsSnapshotAvro snapshot) {
+        try {
+            ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
+                    "${kafka.config.sensor-snapshots-topic=telemetry.snapshots.v1}",
+                    null,
+                    snapshot.getTimestamp().toEpochMilli(),
+                    snapshot.getHubId(),
+                    snapshot);
+            producer.send(record);
+        } catch (Exception e) {
+            log.error("Ошибка отправки сообщения в топик: {}", e.getMessage(), e);
+        }
+    }
 
     private static void manageOffsets(ConsumerRecord<String, SensorEventAvro> record, int count, Consumer<String, SensorEventAvro> consumer) {
         currentOffsets.put(
