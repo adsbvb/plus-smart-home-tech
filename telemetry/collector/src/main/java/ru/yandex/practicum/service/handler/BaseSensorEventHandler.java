@@ -8,7 +8,7 @@ import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 import java.time.Instant;
 
-import static ru.yandex.practicum.configuration.KafkaConfig.SENSOR_EVENTS;
+import static ru.yandex.practicum.configuration.KafkaConfig.SENSOR_EVENTS_TOPIC;
 
 @Slf4j
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
@@ -45,8 +45,8 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         log.debug("SensorEventAvro создан, размер payload: {} байт",
                 payload != null ? payload.toString().length() : 0);
 
-        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), SENSOR_EVENTS);
-        log.info("Отправлено в Kafka: topic={}, hubId={}", SENSOR_EVENTS, event.getHubId());
+        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), SENSOR_EVENTS_TOPIC);
+        log.info("Отправлено в Kafka: topic={}, hubId={}", SENSOR_EVENTS_TOPIC, event.getHubId());
     }
 
     public abstract T mapToAvro(SensorEventProto event);
