@@ -21,6 +21,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import static ru.yandex.practicum.configuration.KafkaSnapshotConfiguration.SENSOR_EVENTS_TOPIC;
+import static ru.yandex.practicum.configuration.KafkaSnapshotConfiguration.SNAPSHOTS_TOPIC;
+
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -32,9 +35,9 @@ public class AggregationStarter {
     private final SnapshotAggregatorService snapshotAggregatorService;
 
     private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
-    private static final List<String> TOPICS = List.of("${kafka.config.sensor-events-topic}");
+    private static final List<String> TOPICS = List.of(SNAPSHOTS_TOPIC);
 
-    private static final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
+    private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
     public void start() {
         Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
@@ -78,7 +81,7 @@ public class AggregationStarter {
     private void sendSnapshot(SensorsSnapshotAvro snapshot) {
         try {
             ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
-                    "${kafka.config.sensor-snapshots-topic=telemetry.snapshots.v1}",
+                    SENSOR_EVENTS_TOPIC,
                     null,
                     snapshot.getTimestamp().toEpochMilli(),
                     snapshot.getHubId(),
@@ -89,7 +92,7 @@ public class AggregationStarter {
         }
     }
 
-    private static void manageOffsets(ConsumerRecord<String, SensorEventAvro> record, int count, Consumer<String, SensorEventAvro> consumer) {
+    private void manageOffsets(ConsumerRecord<String, SensorEventAvro> record, int count, Consumer<String, SensorEventAvro> consumer) {
         currentOffsets.put(
                 new TopicPartition(record.topic(), record.partition()),
                 new OffsetAndMetadata(record.offset() + 1)

@@ -8,7 +8,7 @@ import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 import java.time.Instant;
 
-import static ru.yandex.practicum.configuration.KafkaConfig.HUBS_EVENTS;
+import static ru.yandex.practicum.configuration.KafkaConfig.HUBS_EVENTS_TOPIC;
 
 @Slf4j
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
@@ -44,8 +44,8 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
         log.debug("HubEventAvro создан, размер payload: {} байт",
                 payload != null ? payload.toString().length() : 0);
 
-        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), HUBS_EVENTS);
-        log.info("Отправлено в Kafka: topic={}, hubId={}", HUBS_EVENTS, event.getHubId());
+        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), HUBS_EVENTS_TOPIC);
+        log.info("Отправлено в Kafka: topic={}, hubId={}", HUBS_EVENTS_TOPIC, event.getHubId());
     }
 
     public abstract T mapToAvro(HubEventProto event);

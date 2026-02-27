@@ -16,32 +16,45 @@ public class SnapshotAggregatorServiceImpl implements SnapshotAggregatorService 
 
     @Override
     public Optional<SensorsSnapshotAvro> updateState(SensorEventAvro event) {
-        SensorsSnapshotAvro sensorsSnapshotAvro = snapshotsMap.getOrDefault(
-                event.getId(),
-                createNewSnapshot(event.getHubId(), event)
+        String hubId = event.getHubId();
+        String sensorId = event.getId();
+
+        SensorsSnapshotAvro snapshotAvro = snapshotsMap.getOrDefault(
+                hubId,
+                createNewSnapshot(hubId, event)
         );
-        /*Проверяем, есть ли снапшот для event.getHubId()
-        Если снапшот есть, то достаём его
-        Если нет, то создаём новый
 
-        Проверяем, есть ли в снапшоте данные для event.getId()
-        Если данные есть, то достаём их в переменную oldState
-        Проверка, если oldState.getTimestamp() произошёл позже, чем
-        event.getTimestamp() или oldState.getData() равен
-        event.getPayload(), то ничего обнавлять не нужно, выходим из метода
-        вернув Optional.empty()
+        SensorStateAvro oldState = snapshotAvro.getSensorsState().get(sensorId);
 
-        // если дошли до сюда, значит, пришли новые данные и
-        // снапшот нужно обновить
-        Создаём экземпляр SensorStateAvro на основе данных события
-        Добавляем полученный экземпляр в снапшот
-        Обновляем таймстемп снапшота таймстемпом из события
-        Возвращаем снапшот - Optional.of(snapshot)*/
+        if (oldState != null) {
+            if (oldState.getTimestamp().isAfter(event.getTimestamp())) {
+                return Optional.empty();
+            }
+            if (oldState.getData().equals(event.getPayload())) {
+                return Optional.empty();
+            }
+        }
+
+        SensorStateAvro newState = createNewSensorState(event);
+
+        snapshotAvro.getSensorsState().put(sensorId, newState);
+        snapshotAvro.setTimestamp(event.getTimestamp());
+
+        snapshotsMap.put(hubId, snapshotAvro);
+
+        return Optional.of(snapshotAvro);
     }
 
     private SensorsSnapshotAvro createNewSnapshot(String hubId, SensorEventAvro event) {
-        Map<String, SensorStateAvro> stateAvroMap = new HashMap<>();
-        SensorStateAvro sensorStateAvro = SensorStateAvro.newBuilder()
+        return SensorsSnapshotAvro.newBuilder()
+                .setHubId(hubId)
+                .setTimestamp(event.getTimestamp())
+                .setSensorsState(new HashMap<>())
+                .build();
+    }
+
+    private SensorStateAvro createNewSensorState(SensorEventAvro event) {
+        return SensorStateAvro.newBuilder()
                 .setTimestamp(event.getTimestamp())
                 .setData(event.getPayload())
                 .build();

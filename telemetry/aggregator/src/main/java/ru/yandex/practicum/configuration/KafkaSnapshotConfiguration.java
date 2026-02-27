@@ -16,6 +16,9 @@ import java.util.Properties;
 @Configuration
 public class KafkaSnapshotConfiguration {
 
+    public static final String SENSOR_EVENTS_TOPIC = "telemetry.sensors.v1";
+    public static final String SNAPSHOTS_TOPIC = "telemetry.snapshots.v1";
+
     @Bean
     public Consumer<String, SensorEventAvro> kafkaConsumer() {
         Properties props = new Properties();
