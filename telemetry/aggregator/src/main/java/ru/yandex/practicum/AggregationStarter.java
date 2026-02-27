@@ -35,7 +35,7 @@ public class AggregationStarter {
     private final SnapshotAggregatorService snapshotAggregatorService;
 
     private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
-    private static final List<String> TOPICS = List.of(SNAPSHOTS_TOPIC);
+    private static final List<String> TOPICS = List.of(SENSOR_EVENTS_TOPIC);
 
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
@@ -81,7 +81,7 @@ public class AggregationStarter {
     private void sendSnapshot(SensorsSnapshotAvro snapshot) {
         try {
             ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
-                    SENSOR_EVENTS_TOPIC,
+                    SNAPSHOTS_TOPIC,
                     null,
                     snapshot.getTimestamp().toEpochMilli(),
                     snapshot.getHubId(),
