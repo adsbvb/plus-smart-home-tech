@@ -40,13 +40,19 @@ public class AggregationStarter {
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
     public void start() {
-        Runtime.getRuntime().addShutdownHook(new Thread(consumer::wakeup));
+        Runtime.getRuntime().addShutdownHook(new Thread(() -> {
+            log.info("Получен сигнал завершения, инициируем остановку...");
+            consumer.wakeup();
+        }));
         try {
             consumer.subscribe(TOPICS);
             while (true) {
+                log.debug("Ожидание новых сообщений...");
                 ConsumerRecords<String, SensorEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
                 int count = 0;
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
+                    log.debug("Обработка записи: topic={}, partition={}, offset={}, key={}",
+                            record.topic(), record.partition(), record.offset(), record.key());
                     handleRecord(record);
                     manageOffsets(record, count, consumer);
                     count++;
@@ -65,6 +71,7 @@ public class AggregationStarter {
                 consumer.close();
                 log.info("Закрываем продюсер");
                 producer.close();
+                log.info("AggregationStarter завершил работу");
             }
         }
     }
@@ -79,6 +86,10 @@ public class AggregationStarter {
     }
 
     private void sendSnapshot(SensorsSnapshotAvro snapshot) {
+        log.info("Отправка снепшота для хаба {} в топик {}", snapshot.getHubId(), SNAPSHOTS_TOPIC);
+        log.debug("Детали снепшота: timestamp={}, количество датчиков={}",
+                snapshot.getTimestamp(), snapshot.getSensorsState().size());
+
         try {
             ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
                     SNAPSHOTS_TOPIC,
