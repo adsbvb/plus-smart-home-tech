@@ -30,4 +30,3 @@ public class AnalyzerRunner {
         snapshotProcessor.start();
     }
 }
-

@@ -9,7 +9,6 @@ import org.apache.kafka.clients.consumer.OffsetAndMetadata;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 
 import java.time.Duration;
@@ -36,32 +35,39 @@ public class SnapshotProcessor {
             log.info("Получен сигнал завершения, инициируем остановку...");
             consumer.wakeup();
         }));
+
         try {
             consumer.subscribe(TOPICS);
+
             while (true) {
                 log.debug("Ожидание новых сообщений...");
                 ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+
                 int count = 0;
+
                 for (ConsumerRecord<String, SensorsSnapshotAvro> record : records) {
                     log.debug("Обработка снепшота: topic={}, partition={}, offset={}, hubId={}",
                             record.topic(), record.partition(), record.offset(), record.key());
 
                     handleSnapshot(record);
                     manageOffsets(record, count, consumer);
+
                     count++;
                 }
             }
+
         } catch (WakeupException ignored) {
             // игнорируем - закрываем консьюмер и продюсер в блоке finally
         } catch (Exception e) {
-            log.error("Ошибка во время обработки событий от датчиков", e);
+            log.error("Критическая ошибка", e);
+
         } finally {
             try {
                 consumer.commitSync(currentOffsets);
             } finally {
                 log.info("Закрываем консьюмер");
                 consumer.close();
-                log.info("AggregationStarter завершил работу");
+                log.info("Analyzer завершил работу");
             }
         }
     }
@@ -80,5 +86,9 @@ public class SnapshotProcessor {
                 }
             });
         }
+    }
+
+    private void handleSnapshot(ConsumerRecord<String, SensorsSnapshotAvro> record) {
+
     }
 }
