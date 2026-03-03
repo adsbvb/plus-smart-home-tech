@@ -2,7 +2,6 @@ package ru.yandex.practicum.service.producer;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -14,7 +13,7 @@ import org.springframework.stereotype.Component;
 import java.time.Instant;
 import java.util.Properties;
 
-import static ru.yandex.practicum.configuration.KafkaConfig.*;
+import static ru.yandex.practicum.configuration.KafkaConfiguration.*;
 
 @Slf4j
 @Component
