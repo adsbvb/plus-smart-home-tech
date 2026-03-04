@@ -26,17 +26,15 @@ public class HubEventServiceImpl implements HubEventService {
 
     @Override
     public void processEvent(HubEventAvro event) {
-        String hubId = event.getHubId();
-        Object payload = event.getPayload();
         String type = event.getPayload().getClass().getName();
 
         HubEventHandler handler = hubEventHandlers.get(type);
 
         if (handler == null) {
-            log.warn("Нет обработчика для типа события: {}", eventType);
+            log.warn("Нет обработчика для типа события: {}", type);
             return;
         }
 
-        handler.handle(payload);
+        handler.handle(event);
     }
 }

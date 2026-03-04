@@ -14,7 +14,7 @@ import java.util.Objects;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class ScenarioActions {
+public class ScenarioAction {
 
     @EmbeddedId
     private ScenarioActionId id;
