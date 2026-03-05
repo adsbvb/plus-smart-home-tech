@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.analyzer.service.handler;
+package ru.yandex.practicum.telemetry.analyzer.service.handler.hub;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

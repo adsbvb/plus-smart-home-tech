@@ -3,7 +3,7 @@ package ru.yandex.practicum.telemetry.analyzer.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.telemetry.analyzer.service.handler.HubEventHandler;
+import ru.yandex.practicum.telemetry.analyzer.service.handler.hub.HubEventHandler;
 
 import java.util.Map;
 import java.util.Set;

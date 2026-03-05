@@ -1,4 +1,4 @@
-package ru.yandex.practicum.telemetry.analyzer.service.handler;
+package ru.yandex.practicum.telemetry.analyzer.service.handler.hub;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,7 +26,7 @@ public class ScenarioRemovedHandler implements HubEventHandler {
     @Override
     public void handle(HubEventAvro event) {
         String hubId = event.getHubId();
-        ScenarioRemovedEventAvro payload = (ScenarioRemovedEventAvro)  event.getPayload();
+        ScenarioRemovedEventAvro payload = (ScenarioRemovedEventAvro) event.getPayload();
         String scenarioName = payload.getName();
 
         scenarioRepository.findByHubIdAndName(hubId, scenarioName)

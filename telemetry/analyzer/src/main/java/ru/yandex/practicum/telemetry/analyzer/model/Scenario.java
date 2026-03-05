@@ -3,6 +3,8 @@ package ru.yandex.practicum.telemetry.analyzer.model;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.List;
+
 @Entity
 @Table(name = "scenarios")
 @Getter
@@ -22,6 +24,12 @@ public class Scenario {
 
     @Column(name = "name", nullable = false)
     private String name;
+
+    @OneToMany(mappedBy = "scenario")
+    private List<ScenarioCondition> conditions;
+
+    @OneToMany(mappedBy = "scenario")
+    private List<ScenarioAction> actions;
 
     @Override
     public boolean equals(Object o) {
