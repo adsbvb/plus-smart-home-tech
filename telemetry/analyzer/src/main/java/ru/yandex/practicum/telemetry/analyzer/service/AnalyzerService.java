@@ -1,6 +1,5 @@
 package ru.yandex.practicum.telemetry.analyzer.service;
 
-import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
@@ -45,26 +44,51 @@ public class AnalyzerService {
         log.info("Найдено {} сценариев для хаба {}", scenarios.size(), hubId);
 
         for (Scenario scenario : scenarios) {
-            checkScenario(scenario, snapshot);
+            if (checkScenario(scenario, snapshot)) {
+
+            };
         }
     }
 
-    private void checkScenario(Scenario scenario, SensorsSnapshotAvro snapshot) {
-        Map<String, SensorStateAvro> sensorStates = snapshot.getSensorsState();
+    private boolean checkScenario(Scenario scenario, SensorsSnapshotAvro snapshot) {
+        log.debug("Проверка сценария: {}", scenario.getName());
         for (ScenarioCondition condition : scenario.getConditions()) {
-            checkCondition(condition, sensorStates);
+            if (!checkCondition(condition, snapshot)) {
+                log.debug("Условие не выполнено. Датчик: {}. Тип: {}.", condition.getSensor().getId(),
+                        condition.getCondition().getType());
+                return false;
+            }
         }
+        return true;
     }
 
-    private boolean checkCondition(ScenarioCondition condition, Map<String, SensorStateAvro> sensorStates) {
-        SensorStateAvro state = sensorStates.get(condition.getSensor().getId());
-        String type = state.getData().getClass().getName();
+    private boolean checkCondition(ScenarioCondition condition, SensorsSnapshotAvro snapshot) {
+        Map<String, SensorStateAvro> sensorStates = snapshot.getSensorsState();
 
-        if (!sensorEventHandlers.containsKey(type)) {
-            throw new IllegalArgumentException("Не найден обработчик для сенсора " + type);
+        SensorStateAvro state = sensorStates.get(condition.getSensor().getId());
+
+        if (state == null) {
+            log.debug("Датчик {} не найден в снапшоте", condition.getSensor().getId());
+            return false;
         }
 
-        SensorEventHandler sensorEventHandler = sensorEventHandlers.get(type);
-        Integer value = sensorEventHandler.getValue(condition.getCondition().getType(), state);
+        String dataType = state.getData().getClass().getName();
+
+        SensorEventHandler handler = sensorEventHandlers.get(dataType);
+
+        if (handler == null) {
+            log.error("Не найден обработчик для типа данных сенсора: {}", dataType);
+            throw new IllegalArgumentException("Нет обработчика для " + dataType);
+        }
+
+        Integer actualValue = handler.getValue(condition.getCondition().getType(), state);
+
+        if (actualValue == null) {
+            log.debug("Не удалось получить значение типа {} из датчика {}",
+                    condition.getCondition().getType(), condition.getSensor().getId());
+            return false;
+        }
+
+        Integer expectedValue = condition.getCondition().getValue();
     }
 }
