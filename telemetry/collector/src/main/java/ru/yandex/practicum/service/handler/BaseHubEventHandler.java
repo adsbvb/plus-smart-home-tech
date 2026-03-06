@@ -8,7 +8,7 @@ import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 import java.time.Instant;
 
-import static ru.yandex.practicum.configuration.KafkaConfig.HUBS_EVENTS_TOPIC;
+import static ru.yandex.practicum.configuration.KafkaConfiguration.HUBS_EVENTS_TOPIC;
 
 @Slf4j
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {

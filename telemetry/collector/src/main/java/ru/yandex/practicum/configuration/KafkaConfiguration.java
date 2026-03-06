@@ -1,6 +1,6 @@
 package ru.yandex.practicum.configuration;
 
-public class KafkaConfig {
+public class KafkaConfiguration {
 
     // topics
     public static final String SENSOR_EVENTS_TOPIC = "telemetry.sensors.v1";
