@@ -10,6 +10,9 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
+import ru.yandex.practicum.telemetry.analyzer.model.Scenario;
+import ru.yandex.practicum.telemetry.analyzer.service.AnalyzerService;
+import ru.yandex.practicum.telemetry.analyzer.service.HubEventServiceImpl;
 
 import java.time.Duration;
 import java.util.HashMap;
@@ -24,6 +27,8 @@ import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConfigur
 public class SnapshotProcessor {
 
     private final Consumer<String, SensorsSnapshotAvro> consumer;
+    private final AnalyzerService analyzerService;
+    private final HubEventServiceImpl hubEventService;
 
     private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
     private static final List<String> TOPICS = List.of(SNAPSHOTS_TOPIC);
@@ -89,6 +94,11 @@ public class SnapshotProcessor {
     }
 
     private void handleSnapshot(ConsumerRecord<String, SensorsSnapshotAvro> record) {
+        List<Scenario> scenariosToExecute = analyzerService.analyze(record.value());
 
+        if (!scenariosToExecute.isEmpty()) {
+            log.info("Найдено {} сценариев для выполнения", scenariosToExecute.size());
+            hubEventService.actionExecute(scenariosToExecute);
+        }
     }
 }

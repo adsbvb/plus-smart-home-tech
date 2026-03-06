@@ -5,10 +5,12 @@ import org.springframework.stereotype.Service;
 import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 import ru.yandex.practicum.telemetry.analyzer.dal.ScenarioRepository;
+import ru.yandex.practicum.telemetry.analyzer.model.ConditionOperation;
 import ru.yandex.practicum.telemetry.analyzer.model.Scenario;
 import ru.yandex.practicum.telemetry.analyzer.model.ScenarioCondition;
 import ru.yandex.practicum.telemetry.analyzer.service.handler.sensor.SensorEventHandler;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -31,23 +33,31 @@ public class AnalyzerService {
                 ));
     }
 
-    public void analyze(SensorsSnapshotAvro snapshot) {
+    public List<Scenario> analyze(SensorsSnapshotAvro snapshot) {
+
+        log.info("Анализ снапшота: {}", snapshot);
+
+        List<Scenario> scenariosToExecute = new ArrayList<>();
 
         String hubId = snapshot.getHubId();
         List<Scenario> scenarios = scenarioRepository.findByHubId(hubId);
 
         if (scenarios.isEmpty()) {
             log.debug("Для хаба {} сценарии не найдены", hubId);
-            return;
+            return scenariosToExecute;
         }
 
         log.info("Найдено {} сценариев для хаба {}", scenarios.size(), hubId);
 
         for (Scenario scenario : scenarios) {
             if (checkScenario(scenario, snapshot)) {
-
+                scenariosToExecute.add(scenario);
             };
         }
+
+        log.debug("Найдено сценариев для выполнения в количестве: {}", scenariosToExecute.size());
+
+        return scenariosToExecute;
     }
 
     private boolean checkScenario(Scenario scenario, SensorsSnapshotAvro snapshot) {
@@ -63,6 +73,7 @@ public class AnalyzerService {
     }
 
     private boolean checkCondition(ScenarioCondition condition, SensorsSnapshotAvro snapshot) {
+
         Map<String, SensorStateAvro> sensorStates = snapshot.getSensorsState();
 
         SensorStateAvro state = sensorStates.get(condition.getSensor().getId());
@@ -90,5 +101,20 @@ public class AnalyzerService {
         }
 
         Integer expectedValue = condition.getCondition().getValue();
+        ConditionOperation operation = condition.getCondition().getOperation();
+
+        boolean result = compareValues(actualValue, expectedValue, operation);
+
+        log.debug("Датчик: {}, {}, {}, {}", condition.getSensor().getId(), actualValue, expectedValue, result);
+
+        return result;
+    }
+
+    private boolean compareValues(Integer actualValue, Integer expectedValue, ConditionOperation operation) {
+        return switch (operation) {
+            case LOWER_THAN -> actualValue < expectedValue;
+            case EQUALS -> actualValue.equals(expectedValue);
+            case GREATER_THAN -> actualValue > expectedValue;
+        };
     }
 }
