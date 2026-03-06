@@ -2,6 +2,7 @@ package ru.yandex.practicum.telemetry.analyzer.service;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.SensorStateAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 import ru.yandex.practicum.telemetry.analyzer.dal.ScenarioRepository;
@@ -33,6 +34,7 @@ public class AnalyzerService {
                 ));
     }
 
+    @Transactional(readOnly = true)
     public List<Scenario> analyze(SensorsSnapshotAvro snapshot) {
 
         log.info("Анализ снапшота: {}", snapshot);
@@ -40,7 +42,7 @@ public class AnalyzerService {
         List<Scenario> scenariosToExecute = new ArrayList<>();
 
         String hubId = snapshot.getHubId();
-        List<Scenario> scenarios = scenarioRepository.findByHubId(hubId);
+        List<Scenario> scenarios = scenarioRepository.findByHubIdWithActions(hubId);
 
         if (scenarios.isEmpty()) {
             log.debug("Для хаба {} сценарии не найдены", hubId);
