@@ -19,7 +19,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConfiguration.SNAPSHOTS_TOPIC;
+import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConsumerConfiguration.SNAPSHOTS_TOPIC;
 
 @Slf4j
 @Component

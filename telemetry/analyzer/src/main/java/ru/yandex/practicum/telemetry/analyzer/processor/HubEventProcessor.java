@@ -13,7 +13,7 @@ import ru.yandex.practicum.telemetry.analyzer.service.HubEventService;
 import java.time.Duration;
 import java.util.List;
 
-import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConfiguration.HUBS_EVENTS_TOPIC;
+import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConsumerConfiguration.HUBS_EVENTS_TOPIC;
 
 
 @Slf4j

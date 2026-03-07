@@ -1,44 +1,33 @@
 package ru.yandex.practicum.telemetry.analyzer.configuration;
 
-import org.apache.kafka.clients.consumer.Consumer;
-import org.apache.kafka.clients.consumer.ConsumerConfig;
-import org.apache.kafka.clients.consumer.KafkaConsumer;
-import org.apache.kafka.common.serialization.StringDeserializer;
-import org.springframework.context.annotation.Bean;
+import lombok.Data;
+import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
-import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
-import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
-
-import java.util.Properties;
 
 @Configuration
+@ConfigurationProperties(prefix = "kafka")
+@Data
 public class KafkaConfiguration {
 
-    public static final String SNAPSHOTS_TOPIC = "telemetry.snapshots.v1";
-    public static final String HUBS_EVENTS_TOPIC = "telemetry.hubs.v1";
+    private String bootstrapServers;
 
-    @Bean
-    public Consumer<String, SensorsSnapshotAvro> getSnapshotConsumer() {
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer-snapshot-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                "ru.yandex.practicum.kafka.deserializer.SensorSnapshotDeserializer");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "false");
-        return new KafkaConsumer<>(props);
+    private SnapshotConfig snapshotConfig = new SnapshotConfig();
+    private HubEventConfig hubEventConfig = new HubEventConfig();
+
+    @Data
+    public static class SnapshotConfig {
+        private String groupId;
+        private String keyDeserializer;
+        private String valueDeserializer;
+        private boolean enableAutoCommit;
     }
 
-    @Bean
-    public Consumer<String, HubEventAvro> getHubConsumer() {
-        Properties props = new Properties();
-        props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, "localhost:9092");
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "analyzer-hub-group");
-        props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
-        props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG,
-                "ru.yandex.practicum.kafka.deserializer.HubEventDeserializer");
-        props.put(ConsumerConfig.ENABLE_AUTO_COMMIT_CONFIG, "true");
-        props.put(ConsumerConfig.AUTO_COMMIT_INTERVAL_MS_CONFIG, "5000");
-        return new KafkaConsumer<>(props);
+    @Data
+    public static class HubEventConfig {
+        private String groupId;
+        private String keyDeserializer;
+        private String valueDeserializer;
+        private boolean enableAutoCommit;
+        private String autoCommitIntervalMs;
     }
 }
