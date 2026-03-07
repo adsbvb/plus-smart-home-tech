@@ -3,7 +3,6 @@ package ru.yandex.practicum.telemetry.analyzer.service.handler.hub;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioRemovedEventAvro;
 import ru.yandex.practicum.telemetry.analyzer.dal.ScenarioActionRepository;
@@ -12,7 +11,6 @@ import ru.yandex.practicum.telemetry.analyzer.dal.ScenarioRepository;
 
 @Slf4j
 @Component
-@Transactional
 @RequiredArgsConstructor
 public class ScenarioRemovedHandler implements HubEventHandler {
 
