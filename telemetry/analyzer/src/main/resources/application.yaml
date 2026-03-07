@@ -30,15 +30,14 @@ logging:
 
 kafka:
   bootstrap-servers: localhost:9092
-  consumer:
-    snapshot:
-      group-id: analyzer-snapshot-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: ru.yandex.practicum.kafka.deserializer.SensorSnapshotDeserializer
-      enable-auto-commit: false
-    hub:
-      group-id: analyzer-hub-group
-      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
-      value-deserializer: ru.yandex.practicum.kafka.deserializer.HubEventDeserializer
-      enable-auto-commit: true
-      auto-commit-interval-ms: 5000
+  snapshot-config:
+    group-id: analyzer-snapshot-group
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: ru.yandex.practicum.kafka.deserializer.SensorSnapshotDeserializer
+    enable-auto-commit: false
+  hub-event-config:
+    group-id: analyzer-hub-group
+    key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+    value-deserializer: ru.yandex.practicum.kafka.deserializer.HubEventDeserializer
+    enable-auto-commit: true
+    auto-commit-interval-ms: 5000
