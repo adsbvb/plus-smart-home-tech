@@ -3,7 +3,6 @@ package ru.yandex.practicum.telemetry.analyzer.service.handler.hub;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
@@ -12,13 +11,10 @@ import ru.yandex.practicum.telemetry.analyzer.dal.*;
 import ru.yandex.practicum.telemetry.analyzer.mapper.EnumMapper;
 import ru.yandex.practicum.telemetry.analyzer.model.*;
 
-import java.util.*;
-import java.util.function.Function;
-import java.util.stream.Collectors;
+import java.util.List;
 
 @Slf4j
 @Component
-@Transactional
 @RequiredArgsConstructor
 public class ScenarioAddedHandler implements HubEventHandler {
 
@@ -65,28 +61,12 @@ public class ScenarioAddedHandler implements HubEventHandler {
         log.info("Сценарий {} успешно сохранен для хаба {}", scenarioName, hubId);
     }
 
-    private void saveConditions(Scenario scenario, List<ScenarioConditionAvro> conditionAvros, String hubId) {
+    private void saveConditions(Scenario scenario, List<ScenarioConditionAvro> conditions, String hubId) {
+        for (ScenarioConditionAvro conditionAvro : conditions) {
 
-        if (conditionAvros.isEmpty()) {
-            return;
-        }
+            Sensor sensor = sensorRepository.findByIdAndHubId(conditionAvro.getSensorId(), hubId)
+                    .orElseThrow(() -> new RuntimeException("Датчик не найден!"));
 
-        Set<String> sensorIds = conditionAvros.stream()
-                .map(ScenarioConditionAvro::getSensorId)
-                .collect(Collectors.toSet());
-
-        Map<String, Sensor> sensorMap = sensorRepository.findAllByIdInAndHubId(sensorIds, hubId).stream()
-                .collect(Collectors.toMap(Sensor::getId, Function.identity()));
-
-        for (String sensorId : sensorIds) {
-            if (!sensorMap.containsKey(sensorId)) {
-                throw new RuntimeException("Датчик не найден: " + sensorId);
-            }
-        }
-
-        List<Condition> conditionList = new ArrayList<>();
-
-        for (ScenarioConditionAvro conditionAvro : conditionAvros) {
 
             Condition condition = Condition.builder()
                     .type(EnumMapper.toConditionType(conditionAvro.getType()))
@@ -94,16 +74,7 @@ public class ScenarioAddedHandler implements HubEventHandler {
                     .value(convertValue(conditionAvro.getValue()))
                     .build();
 
-            conditionList.add(condition);
-        }
-
-        List<Condition> savedConditions = conditionRepository.saveAll(conditionList);
-        List<ScenarioCondition> scenarioConditionList = new ArrayList<>();
-
-        for (int i = 0; i < savedConditions.size(); i++) {
-            ScenarioConditionAvro conditionAvro = conditionAvros.get(i);
-            Sensor sensor = sensorMap.get(conditionAvro.getSensorId());
-            Condition condition = savedConditions.get(i);
+            conditionRepository.save(condition);
 
             ScenarioCondition.ScenarioConditionId id = new ScenarioCondition.ScenarioConditionId(
                     scenario.getId(),
@@ -118,10 +89,11 @@ public class ScenarioAddedHandler implements HubEventHandler {
                     .condition(condition)
                     .build();
 
-            scenarioConditionList.add(scenarioCondition);
-        }
+            scenarioConditionRepository.save(scenarioCondition);
 
-        scenarioConditionRepository.saveAll(scenarioConditionList);
+            log.debug("Добавлено условие: sensor={}, type={}, operation={}, value={}",
+                    sensor.getId(), condition.getType(), condition.getOperation(), condition.getValue());
+        }
     }
 
     private Integer convertValue(Object value) {
@@ -133,44 +105,18 @@ public class ScenarioAddedHandler implements HubEventHandler {
         };
     }
 
-    private void saveActions(Scenario scenario, List<DeviceActionAvro> actionAvros, String hubId) {
+    private void saveActions(Scenario scenario, List<DeviceActionAvro> actions, String hubId) {
+        for (DeviceActionAvro actionAvro : actions) {
 
-        if (actionAvros.isEmpty()) {
-            return;
-        }
-
-        Set<String> sensorIds = actionAvros.stream()
-                .map(DeviceActionAvro::getSensorId)
-                .collect(Collectors.toSet());
-
-        Map<String, Sensor> sensorMap = sensorRepository.findAllByIdInAndHubId(sensorIds, hubId).stream()
-                .collect(Collectors.toMap(Sensor::getId, Function.identity()));
-
-        for (String sensorId : sensorIds) {
-            if (!sensorMap.containsKey(sensorId)) {
-                throw new RuntimeException("Датчик не найден: " + sensorId);
-            }
-        }
-
-        List<Action> actionList = new ArrayList<>();
-
-        for (DeviceActionAvro actionAvro : actionAvros) {
+            Sensor sensor = sensorRepository.findByIdAndHubId(actionAvro.getSensorId(), hubId)
+                    .orElseThrow(() -> new RuntimeException("Датчик не найден!"));
 
             Action action = Action.builder()
                     .type(EnumMapper.toActionType(actionAvro.getType()))
                     .value(actionAvro.getValue() != null ? actionAvro.getValue() : 0)
                     .build();
 
-            actionList.add(action);
-        }
-
-        List<Action> savedActions = actionRepository.saveAll(actionList);
-        List<ScenarioAction> scenarioActionList = new ArrayList<>();
-
-        for (int i = 0; i < savedActions.size(); i++) {
-            DeviceActionAvro deviceActionAvro = actionAvros.get(i);
-            Sensor sensor = sensorMap.get(deviceActionAvro.getSensorId());
-            Action action = savedActions.get(i);
+            actionRepository.save(action);
 
             ScenarioAction.ScenarioActionId id = new ScenarioAction.ScenarioActionId(
                     scenario.getId(),
@@ -185,8 +131,10 @@ public class ScenarioAddedHandler implements HubEventHandler {
                     .action(action)
                     .build();
 
-            scenarioActionList.add(scenarioAction);
+            scenarioActionRepository.save(scenarioAction);
+
+            log.debug("Добавлено действие: sensor={}, type={}, value={}",
+                    sensor.getId(), action.getType(), action.getValue());
         }
-        scenarioActionRepository.saveAll(scenarioActionList);
     }
 }
