@@ -2,6 +2,7 @@ package ru.yandex.practicum.service.producer;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
 import org.apache.kafka.clients.producer.KafkaProducer;
@@ -9,28 +10,33 @@ import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.configuration.KafkaProperties;
 
 import java.time.Instant;
 import java.util.Properties;
 
-import static ru.yandex.practicum.configuration.KafkaConfiguration.*;
-
 @Slf4j
 @Component
+@RequiredArgsConstructor
 public class KafkaEventProducerImpl implements KafkaEventProducer {
 
+    private final KafkaProperties kafkaProperties;
     private Producer<String, SpecificRecordBase> producer;
 
     @PostConstruct
     public void init() {
-            initProducer();
+        initProducer();
     }
 
     private void initProducer() {
+
+        Properties properties = kafkaProperties.getProducer().getProperties();
+
         Properties config = new Properties();
-        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, BOOTSTRAP_SERVERS);
-        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, KEY_SERIALIZER_CLASS);
-        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, VALUE_SERIALIZER_CLASS);
+
+        config.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, properties.getProperty("bootstrap.servers"));
+        config.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, properties.getProperty("key.serializer"));
+        config.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, properties.getProperty("value.serializer"));
 
         producer = new KafkaProducer<>(config);
         log.info("Kafka producer инициализирован с bootstrap.servers = {}", config.get("bootstrap.servers"));
