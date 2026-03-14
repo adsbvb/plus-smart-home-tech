@@ -2,21 +2,22 @@ package ru.yandex.practicum.service.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
+import ru.yandex.practicum.configuration.KafkaProperties;
 import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 import java.time.Instant;
 
-import static ru.yandex.practicum.configuration.KafkaConfiguration.SENSOR_EVENTS_TOPIC;
-
 @Slf4j
 public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> implements SensorEventHandler {
 
     private final KafkaEventProducer producer;
+    private final KafkaProperties kafkaProperties;
 
-    protected BaseSensorEventHandler(KafkaEventProducer producer) {
+    protected BaseSensorEventHandler(KafkaEventProducer producer, KafkaProperties kafkaProperties) {
         this.producer = producer;
+        this.kafkaProperties = kafkaProperties;
     }
 
     @Override
@@ -24,7 +25,7 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         log.info("Тип: {}, sensorId: {}, hubId: {}, timestamp: {}",
                 event.getPayloadCase(), event.getId(), event.getHubId(), event.getTimestamp());
 
-        // Проверка соответсвия типа события ожидаемому типу обрботчика
+        // Проверка соответствия типа события ожидаемому типу обработчика
         if (!event.getPayloadCase().equals(getMessageType())) {
             log.error("Несоответствие типа события. Ожидался: {}, получен: {}",
                     getMessageType(), event.getPayloadCase());
@@ -45,8 +46,8 @@ public abstract class BaseSensorEventHandler<T extends SpecificRecordBase> imple
         log.debug("SensorEventAvro создан, размер payload: {} байт",
                 payload != null ? payload.toString().length() : 0);
 
-        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), SENSOR_EVENTS_TOPIC);
-        log.info("Отправлено в Kafka: topic={}, hubId={}", SENSOR_EVENTS_TOPIC, event.getHubId());
+        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), kafkaProperties.getTopicSensor());
+        log.info("Отправлено в Kafka: topic={}, hubId={}", kafkaProperties.getTopicSensor(), event.getHubId());
     }
 
     public abstract T mapToAvro(SensorEventProto event);

@@ -8,13 +8,8 @@ import org.apache.kafka.clients.consumer.ConsumerRecords;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
+import ru.yandex.practicum.telemetry.analyzer.configuration.KafkaProperties;
 import ru.yandex.practicum.telemetry.analyzer.service.HubEventService;
-
-import java.time.Duration;
-import java.util.List;
-
-import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConsumerConfiguration.HUBS_EVENTS_TOPIC;
-
 
 @Slf4j
 @Component
@@ -24,8 +19,7 @@ public class HubEventProcessor implements Runnable {
     private final Consumer<String, HubEventAvro> consumer;
     private final HubEventService hubEventService;
 
-    private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
-    private static final List<String> TOPICS = List.of(HUBS_EVENTS_TOPIC);
+    private final KafkaProperties kafkaProperties;
 
     @Override
     public void run() {
@@ -35,10 +29,11 @@ public class HubEventProcessor implements Runnable {
         }));
 
         try {
-            consumer.subscribe(TOPICS);
+            consumer.subscribe(kafkaProperties.getHubEventConfig().getTopics());
 
             while (true) {
-                ConsumerRecords<String, HubEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+                ConsumerRecords<String, HubEventAvro> records = consumer.poll(
+                        kafkaProperties.getHubEventConfig().getPollTimeout());
 
                 for (ConsumerRecord<String, HubEventAvro> record : records) {
                     log.debug("Обработка хаб-ивента: topic={}, partition={}, offset={}, hubId={}",

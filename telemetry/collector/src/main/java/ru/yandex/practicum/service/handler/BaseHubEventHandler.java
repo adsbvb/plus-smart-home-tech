@@ -2,21 +2,22 @@ package ru.yandex.practicum.service.handler;
 
 import lombok.extern.slf4j.Slf4j;
 import org.apache.avro.specific.SpecificRecordBase;
+import ru.yandex.practicum.configuration.KafkaProperties;
 import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.service.producer.KafkaEventProducer;
 
 import java.time.Instant;
 
-import static ru.yandex.practicum.configuration.KafkaConfiguration.HUBS_EVENTS_TOPIC;
-
 @Slf4j
 public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implements HubEventHandler {
 
     private final KafkaEventProducer producer;
+    private final KafkaProperties kafkaProperties;
 
-    protected BaseHubEventHandler(KafkaEventProducer producer) {
+    protected BaseHubEventHandler(KafkaEventProducer producer, KafkaProperties kafkaProperties) {
         this.producer = producer;
+        this.kafkaProperties = kafkaProperties;
     }
 
     @Override
@@ -24,7 +25,7 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
         log.info("Тип события: {}, HubId: {}, Timestamp: {}",
                 event.getPayloadCase(), event.getHubId(), event.getTimestamp());
 
-        // Проверка соответсвия типа события ожидаемому типу обрботчика
+        // Проверка соответствия типа события ожидаемому типу обработчика
         if (!event.getPayloadCase().equals(getMessageType())) {
             log.error("Несоответствие типа события. Ожидался: {}, получен: {}",
                     getMessageType(), event.getPayloadCase());
@@ -44,8 +45,8 @@ public abstract class BaseHubEventHandler<T extends SpecificRecordBase> implemen
         log.debug("HubEventAvro создан, размер payload: {} байт",
                 payload != null ? payload.toString().length() : 0);
 
-        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), HUBS_EVENTS_TOPIC);
-        log.info("Отправлено в Kafka: topic={}, hubId={}", HUBS_EVENTS_TOPIC, event.getHubId());
+        producer.send(eventAvro, event.getHubId(), eventAvro.getTimestamp(), kafkaProperties.getTopicHub());
+        log.info("Отправлено в Kafka: topic={}, hubId={}", kafkaProperties.getTopicHub(), event.getHubId());
     }
 
     public abstract T mapToAvro(HubEventProto event);

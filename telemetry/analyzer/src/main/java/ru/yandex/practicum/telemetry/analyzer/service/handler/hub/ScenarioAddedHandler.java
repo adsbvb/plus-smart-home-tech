@@ -120,7 +120,6 @@ public class ScenarioAddedHandler implements HubEventHandler {
 
             scenarioConditionList.add(scenarioCondition);
         }
-
         scenarioConditionRepository.saveAll(scenarioConditionList);
     }
 

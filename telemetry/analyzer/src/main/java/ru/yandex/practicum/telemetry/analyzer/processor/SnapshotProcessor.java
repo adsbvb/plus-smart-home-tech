@@ -10,16 +10,14 @@ import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
+import ru.yandex.practicum.telemetry.analyzer.configuration.KafkaProperties;
 import ru.yandex.practicum.telemetry.analyzer.model.Scenario;
 import ru.yandex.practicum.telemetry.analyzer.service.AnalyzerService;
 import ru.yandex.practicum.telemetry.analyzer.service.HubEventServiceImpl;
 
-import java.time.Duration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-
-import static ru.yandex.practicum.telemetry.analyzer.configuration.KafkaConsumerConfiguration.SNAPSHOTS_TOPIC;
 
 @Slf4j
 @Component
@@ -30,8 +28,7 @@ public class SnapshotProcessor {
     private final AnalyzerService analyzerService;
     private final HubEventServiceImpl hubEventService;
 
-    private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
-    private static final List<String> TOPICS = List.of(SNAPSHOTS_TOPIC);
+    private final KafkaProperties kafkaProperties;
 
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
@@ -42,11 +39,12 @@ public class SnapshotProcessor {
         }));
 
         try {
-            consumer.subscribe(TOPICS);
+            consumer.subscribe(kafkaProperties.getSnapshotConfig().getTopics());
 
             while (true) {
                 log.debug("Ожидание новых сообщений...");
-                ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+                ConsumerRecords<String, SensorsSnapshotAvro> records = consumer.poll(
+                        kafkaProperties.getSnapshotConfig().getPollTimeout());
 
                 int count = 0;
 
