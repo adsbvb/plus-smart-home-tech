@@ -9,6 +9,7 @@ import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.ProductState;
 import ru.yandex.practicum.enums.QuantityState;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 @Data
@@ -34,15 +35,32 @@ public class ProductEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "quantity_state")
-    private QuantityState quantityState;
+    private QuantityState quantityState;   // описание доступного количества ENDED, FEW, ENOUGH, MANY
 
     @Enumerated(EnumType.STRING)
     @Column(name = "product_state")
-    private ProductState productState;
+    private ProductState productState;   // состояние продукта ACTIVE, DEACTIVATE
 
     @Enumerated(EnumType.STRING)
     @Column(name = "product_category")
-    private ProductCategory productCategory;
+    private ProductCategory productCategory;   //  CONTROL, SENSORS, LIGHTING
 
     private Double price;
+
+    @Column(name = "created_at")
+    private LocalDateTime createdAt;
+
+    @Column(name = "updated_at")
+    private LocalDateTime updatedAt;
+
+    @PrePersist
+    protected void onCreate() {
+        createdAt = LocalDateTime.now();
+        updatedAt = LocalDateTime.now();
+    }
+
+    @PreUpdate
+    protected void onUpdate() {
+        updatedAt = LocalDateTime.now();
+    }
 }
