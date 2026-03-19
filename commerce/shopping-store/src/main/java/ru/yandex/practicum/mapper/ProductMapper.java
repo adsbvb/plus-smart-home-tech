@@ -8,7 +8,6 @@ import ru.yandex.practicum.model.ProductEntity;
 
 @Mapper(componentModel = "spring")
 public interface ProductMapper {
-
     ProductDto toDto(ProductEntity entity);
 
     @Mapping(target = "productId", ignore = true)

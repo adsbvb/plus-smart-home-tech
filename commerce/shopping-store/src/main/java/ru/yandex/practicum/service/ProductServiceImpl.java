@@ -50,7 +50,7 @@ public class ProductServiceImpl implements ProductService {
         ProductEntity existingProduct = productRepository
                 .findByProductId(productId)
                 .orElseThrow(() -> new ProductNotFoundException(
-                        "Продукт не найден с id: " + productId.toString()
+                        "Продукт не найден с id: " + productId
                 ));
 
         productMapper.updateEntity(productDto, existingProduct);

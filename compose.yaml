@@ -34,7 +34,7 @@ services:
                              --bootstrap-server kafka:29092'"
     init: true
 
-  postgres:
+  analyzer-postgres:
     image: postgres:15-alpine
     container_name: analyzer-postgres
     environment:
@@ -45,14 +45,34 @@ services:
     ports:
       - "5432:5432"
     volumes:
-      - postgres_data:/var/lib/postgresql/data
-      - ./init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
+      - analyzer_postgres_data:/var/lib/postgresql/data
     healthcheck:
       test: [ "CMD-SHELL", "pg_isready -U analyzer_user -d analyzer" ]
       interval: 10s
       timeout: 5s
       retries: 5
 
+  commerce-postgres:
+    image: postgres:15-alpine
+    container_name: commerce-postgres
+    environment:
+      POSTGRES_DB: commerce
+      POSTGRES_USER: commerce_user
+      POSTGRES_PASSWORD: commerce_password
+      PGDATA: /var/lib/postgresql/data/pgdata
+    ports:
+      - "6432:5432"
+    volumes:
+      - commerce_postgres_data:/var/lib/postgresql/data
+      - ./init-commerce.sql:/docker-entrypoint-initdb.d/init-commerce.sql
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U commerce_user -d commerce" ]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
-  postgres_data:
+  analyzer_postgres_data:
     name: analyzer-postgres-data
+  commerce_postgres_data:
+    name: commerce-postgres-data
