@@ -1,0 +1,23 @@
+package ru.yandex.practicum.dal;
+
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+import org.springframework.stereotype.Repository;
+import ru.yandex.practicum.model.CartProductEntity;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+
+@Repository
+public interface CartProductRepository extends JpaRepository<CartProductEntity,Integer> {
+    @Modifying
+    @Query("DELETE FROM CartProductEntity cp WHERE cp.cart.cartId = :cartId AND cp.productId in :productIds")
+    int deleteByCartIdAndProductIds(
+            @Param("cartId") UUID cartId,
+            @Param("productIds") List<UUID> productIds);
+
+    Optional<CartProductEntity> findByCart_CartIdAndProductId(UUID cartId, UUID productId);
+}
