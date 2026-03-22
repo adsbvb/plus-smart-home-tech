@@ -14,7 +14,7 @@ spring:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     open-in-view: false
 
 logging:
@@ -26,3 +26,12 @@ logging:
     org.springframework: ERROR
     org.springframework.cloud.netflix.eureka: INFO
     org.apache.kafka: WARN
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: always

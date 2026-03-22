@@ -19,7 +19,7 @@ import java.util.UUID;
 @Service
 @Transactional(readOnly = true)
 @RequiredArgsConstructor
-public class ProductServiceImpl implements ProductService {
+public class ShoppingStoreServiceImpl implements ShoppingStoreService {
 
     private final ProductRepository productRepository;
     private final ProductMapper productMapper;
@@ -83,7 +83,8 @@ public class ProductServiceImpl implements ProductService {
     @Override
     public ProductDto getProductById(UUID productId) {
         ProductEntity product = productRepository
-                .findByProductIdAndProductState(productId, ProductState.ACTIVE)
+                //.findByProductIdAndProductState(productId, ProductState.ACTIVE)
+                .findByProductId(productId)
                 .orElseThrow(() -> new ProductNotFoundException(
                         "Продукт не найден с id: " + productId));
         return  productMapper.toDto(product);

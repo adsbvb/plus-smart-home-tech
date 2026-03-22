@@ -5,9 +5,6 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import ru.yandex.practicum.enums.ProductCategory;
-import ru.yandex.practicum.enums.ProductState;
-import ru.yandex.practicum.enums.QuantityState;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -15,36 +12,25 @@ import java.util.UUID;
 @Data
 @Entity
 @Builder
-@Table(name = "products")
+@Table(name = "warehouse_products")
 @NoArgsConstructor
 @AllArgsConstructor
-public class ProductEntity {
+public class WarehouseProductEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
+    private UUID id;
+
     @Column(name = "product_id")
     private UUID productId;
 
-    @Column(name = "product_name")
-    private String productName;
+    private Long quantity;
+    private Boolean fragile;
 
-    private String description;
+    private Double width;
+    private Double height;
+    private Double depth;
 
-    @Column(name = "image_src")
-    private String imageSrc;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "quantity_state")
-    private QuantityState quantityState;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "product_state")
-    private ProductState productState;
-
-    @Enumerated(EnumType.STRING)
-    @Column(name = "product_category")
-    private ProductCategory productCategory;
-
-    private Double price;
+    private Double weight;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -56,6 +42,9 @@ public class ProductEntity {
     protected void onCreate() {
         createdAt = LocalDateTime.now();
         updatedAt = LocalDateTime.now();
+        if (quantity == null) {
+            quantity = 0L;
+        }
     }
 
     @PreUpdate

@@ -13,7 +13,6 @@ import java.util.UUID;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class NewProductInWarehouseRequest {
-
     @NotNull
     UUID productId;
 

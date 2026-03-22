@@ -11,7 +11,6 @@ import lombok.experimental.FieldDefaults;
 @Builder
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class DimensionDto {
-
     @NotNull
     @DecimalMin(value = "1.0")
     Double width;
