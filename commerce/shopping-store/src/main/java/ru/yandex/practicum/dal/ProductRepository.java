@@ -36,4 +36,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Integer> 
             @Param("quantityState") QuantityState quantityState);
 
     Optional<ProductEntity> findByProductIdAndProductState(UUID productId, ProductState productState);
+
+    Page<ProductEntity> findByProductCategory(ProductCategory category, Pageable pageable);
 }

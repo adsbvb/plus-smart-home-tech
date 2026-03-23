@@ -27,7 +27,8 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public Page<ProductDto> getProductByCategory(ProductCategory category, Pageable pageable) {
         return productRepository
-                .findByProductCategoryAndProductState(category, ProductState.ACTIVE, pageable)
+                //.findByProductCategoryAndProductState(category, ProductState.ACTIVE, pageable)
+                .findByProductCategory(category, pageable)
                 .map(productMapper::toDto);
     }
 
