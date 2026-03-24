@@ -27,7 +27,6 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public Page<ProductDto> getProductByCategory(ProductCategory category, Pageable pageable) {
         return productRepository
-                //.findByProductCategoryAndProductState(category, ProductState.ACTIVE, pageable)
                 .findByProductCategory(category, pageable)
                 .map(productMapper::toDto);
     }
@@ -84,7 +83,6 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public ProductDto getProductById(UUID productId) {
         ProductEntity product = productRepository
-                //.findByProductIdAndProductState(productId, ProductState.ACTIVE)
                 .findByProductId(productId)
                 .orElseThrow(() -> new ProductNotFoundException(
                         "Продукт не найден с id: " + productId));

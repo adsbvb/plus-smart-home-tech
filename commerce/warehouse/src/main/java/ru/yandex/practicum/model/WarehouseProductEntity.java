@@ -1,15 +1,14 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @Table(name = "warehouse_products")
@@ -50,5 +49,17 @@ public class WarehouseProductEntity {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof WarehouseProductEntity)) return false;
+        return id != null && id.equals(((WarehouseProductEntity) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

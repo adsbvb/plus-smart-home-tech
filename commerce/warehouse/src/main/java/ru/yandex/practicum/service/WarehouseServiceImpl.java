@@ -7,11 +7,9 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.ShoppingStoreClient;
 import ru.yandex.practicum.dal.WarehouseRepository;
 import ru.yandex.practicum.dto.*;
-import ru.yandex.practicum.enums.ProductState;
 import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.exception.ProductInShoppingCartLowQuantityInWarehouse;
-import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.exception.SpecifiedProductAlreadyInWarehouseException;
 import ru.yandex.practicum.mapper.WarehouseMapper;
 import ru.yandex.practicum.model.WarehouseProductEntity;
@@ -39,18 +37,6 @@ public class WarehouseServiceImpl implements WarehouseService {
     @Transactional
     public void newProductInWarehouse(NewProductInWarehouseRequest request) {
         UUID productId = request.getProductId();
-
-//        ProductDto product;
-//
-//        try {
-//            product = shoppingStoreClient.getProductById(productId);
-//            if (product.getProductState() != ProductState.ACTIVE) {
-//                throw new ProductNotFoundException("Продукт не активен: " + productId);
-//            }
-//        }  catch (Exception e) {
-//            throw new RuntimeException(
-//                    "Продукт не найден либо сервис не доступен", e);
-//        }
 
         if (warehouseRepository.existsByProductId(productId)) {
             throw new SpecifiedProductAlreadyInWarehouseException("Продукт уже есть на складе: " + productId);
@@ -142,12 +128,6 @@ public class WarehouseServiceImpl implements WarehouseService {
         warehouseRepository.save(product);
 
         log.info("Товар добавлен на склад: {}, количество: {}", productId, request.getQuantity());
-
-        /*QuantityState newState = getWarehouseQuantityState(newQuantity);
-        shoppingStoreClient.setProductQuantityState(
-                productId,
-                newState
-        );*/
     }
 
     @Override

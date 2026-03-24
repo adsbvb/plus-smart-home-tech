@@ -1,16 +1,15 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @Table(name = "carts")
@@ -31,6 +30,19 @@ public class CartEntity {
             cascade = CascadeType.ALL,
             orphanRemoval = true,
             fetch = FetchType.EAGER)
+    @ToString.Exclude
     @Builder.Default
     private List<CartProductEntity> products = new ArrayList<>();
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CartEntity)) return false;
+        return cartId != null && cartId.equals(((CartEntity) o).getCartId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

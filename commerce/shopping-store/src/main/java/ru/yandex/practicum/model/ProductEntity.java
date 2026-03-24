@@ -1,10 +1,7 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.ProductState;
 import ru.yandex.practicum.enums.QuantityState;
@@ -12,7 +9,9 @@ import ru.yandex.practicum.enums.QuantityState;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @Table(name = "products")
@@ -61,5 +60,17 @@ public class ProductEntity {
     @PreUpdate
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof ProductEntity)) return false;
+        return productId != null && productId.equals(((ProductEntity) o).getProductId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
     }
 }

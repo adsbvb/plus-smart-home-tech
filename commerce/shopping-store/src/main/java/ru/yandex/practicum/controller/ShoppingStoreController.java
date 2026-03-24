@@ -6,7 +6,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
@@ -20,7 +19,6 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/api/v1/shopping-store")
 @RequiredArgsConstructor
-@Validated
 public class ShoppingStoreController {
 
     private final ShoppingStoreService shoppingStoreService;

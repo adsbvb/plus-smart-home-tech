@@ -1,14 +1,13 @@
 package ru.yandex.practicum.model;
 
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.util.UUID;
 
-@Data
+@Getter
+@Setter
+@ToString
 @Entity
 @Builder
 @Table(name = "cart_products")
@@ -21,6 +20,7 @@ public class CartProductEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "cart_id")
+    @ToString.Exclude
     private CartEntity cart;
 
     @Column(name = "product_id", nullable = false)
@@ -28,4 +28,16 @@ public class CartProductEntity {
 
     @Column(nullable = false)
     private Long quantity;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof CartProductEntity)) return false;
+        return id != null && id.equals(((CartProductEntity) o).getId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }

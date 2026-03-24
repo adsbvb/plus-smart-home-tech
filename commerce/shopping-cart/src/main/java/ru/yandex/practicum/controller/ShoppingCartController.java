@@ -20,7 +20,7 @@ import java.util.UUID;
 public class ShoppingCartController {
 
     @Autowired
-    ShoppingCartService shoppingCartService;
+    private final ShoppingCartService shoppingCartService;
 
     @GetMapping
     public ShoppingCartDto getShoppingCart(
