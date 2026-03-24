@@ -11,6 +11,7 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.apache.kafka.common.TopicPartition;
 import org.apache.kafka.common.errors.WakeupException;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.configuration.KafkaProperties;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorsSnapshotAvro;
 import ru.yandex.practicum.service.SnapshotAggregatorService;
@@ -21,9 +22,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static ru.yandex.practicum.configuration.KafkaSnapshotConfiguration.SENSOR_EVENTS_TOPIC;
-import static ru.yandex.practicum.configuration.KafkaSnapshotConfiguration.SNAPSHOTS_TOPIC;
-
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -31,11 +29,8 @@ public class AggregationStarter {
 
     private final Consumer<String, SensorEventAvro> consumer;
     private final Producer<String, SensorsSnapshotAvro> producer;
-
+    private final KafkaProperties kafkaProperties;
     private final SnapshotAggregatorService snapshotAggregatorService;
-
-    private static final Duration CONSUME_ATTEMPT_TIMEOUT = Duration.ofMillis(1000);
-    private static final List<String> TOPICS = List.of(SENSOR_EVENTS_TOPIC);
 
     private final Map<TopicPartition, OffsetAndMetadata> currentOffsets = new HashMap<>();
 
@@ -45,10 +40,10 @@ public class AggregationStarter {
             consumer.wakeup();
         }));
         try {
-            consumer.subscribe(TOPICS);
+            consumer.subscribe(getConsumerTopics());
             while (true) {
                 log.debug("Ожидание новых сообщений...");
-                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(CONSUME_ATTEMPT_TIMEOUT);
+                ConsumerRecords<String, SensorEventAvro> records = consumer.poll(getConsumeAttemptTimeout());
                 int count = 0;
                 for (ConsumerRecord<String, SensorEventAvro> record : records) {
                     log.debug("Обработка записи: topic={}, partition={}, offset={}, key={}",
@@ -86,13 +81,13 @@ public class AggregationStarter {
     }
 
     private void sendSnapshot(SensorsSnapshotAvro snapshot) {
-        log.info("Отправка снепшота для хаба {} в топик {}", snapshot.getHubId(), SNAPSHOTS_TOPIC);
+        log.info("Отправка снепшота для хаба {} в топик {}", snapshot.getHubId(), getProducerTopic());
         log.debug("Детали снепшота: timestamp={}, количество датчиков={}",
                 snapshot.getTimestamp(), snapshot.getSensorsState().size());
 
         try {
             ProducerRecord<String, SensorsSnapshotAvro> record = new ProducerRecord<>(
-                    SNAPSHOTS_TOPIC,
+                    getProducerTopic(),
                     null,
                     snapshot.getTimestamp().toEpochMilli(),
                     snapshot.getHubId(),
@@ -116,5 +111,17 @@ public class AggregationStarter {
                 }
             });
         }
+    }
+
+    private Duration getConsumeAttemptTimeout() {
+        return kafkaProperties.getConsumer().getPollTimeout();
+    }
+
+    private String getProducerTopic() {
+        return kafkaProperties.getProducer().getTopic();
+    }
+
+    private List<String> getConsumerTopics() {
+        return kafkaProperties.getConsumer().getTopics();
     }
 }
