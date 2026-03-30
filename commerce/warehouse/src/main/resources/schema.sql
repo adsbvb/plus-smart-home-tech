@@ -1,5 +1,5 @@
 CREATE TABLE IF NOT EXISTS warehouse_products (
-    id UUID DEFAULT get_random_uuid() PRIMARY KEY,
+    id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     product_id UUID NOT NULL UNIQUE,
     quantity BIGINT NOT NULL CHECK (quantity >= 0),
     fragile BOOLEAN DEFAULT FALSE,
