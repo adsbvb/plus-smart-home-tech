@@ -22,6 +22,9 @@ public class OrderEntity {
     @Column(name = "order_id")
     private UUID orderId;
 
+    @Column(name = "username", nullable = false)
+    private String username;
+
     @Column(name = "shopping_cart_id")
     private UUID shoppingCartId;
 
@@ -40,6 +43,7 @@ public class OrderEntity {
     private UUID deliveryId;
 
     @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
     private OrderState state;
 
     @Column(name = "delivery_weight")

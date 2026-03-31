@@ -1,8 +1,9 @@
 CREATE TABLE IF NOT EXISTS orders (
     order_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
-    order_state VARCHAR(20) NOT NULL CHECK (order_state IN (
+    username VARCHAR(50) NOT NULL,
+    order_state VARCHAR(20) NOT NULL DEFAULT 'NEW' CHECK (order_state IN (
         'NEW', 'ON_PAYMENT', 'ON_DELIVERY', 'DONE', 'DELIVERED', 'ASSEMBLED', 'PAID', 'COMPLETED', 'DELIVERY_FAILED',
-        'ASSEMBLY_FAILED', 'PAYMENT_FAILED', 'PRODUCT_RETURNED', 'CANCELED'))
+        'ASSEMBLY_FAILED', 'PAYMENT_FAILED', 'PRODUCT_RETURNED', 'CANCELED')),
     shopping_cart_id UUID,
     delivery_id UUID,
     payment_id UUID,
