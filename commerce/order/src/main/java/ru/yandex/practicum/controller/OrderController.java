@@ -1,0 +1,105 @@
+package ru.yandex.practicum.controller;
+
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.web.bind.annotation.*;
+import ru.yandex.practicum.dto.CreateNewOrderRequest;
+import ru.yandex.practicum.dto.OrderDto;
+import ru.yandex.practicum.dto.ProductReturnRequest;
+import ru.yandex.practicum.service.OrderService;
+
+import java.util.List;
+import java.util.UUID;
+
+@Slf4j
+@RestController
+@RequestMapping("/api/v1/order")
+@RequiredArgsConstructor
+public class OrderController {
+
+    private final OrderService orderService;
+
+    @GetMapping
+    public List<OrderDto> getUserOrders(
+            @RequestParam String username
+    ) {
+        return orderService.getUserOrders(username);
+    }
+
+    @PutMapping
+    public OrderDto createOrder(
+            @RequestBody CreateNewOrderRequest request
+    ) {
+        return orderService.createOrder(request);
+    }
+
+    @PostMapping("/return")
+    public OrderDto returnOrder(
+            @RequestBody ProductReturnRequest request
+    ) {
+        return orderService.returnOrder(request);
+    }
+
+    @PostMapping("/payment")
+    public OrderDto paymentOrder(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.paymentOrder(orderId);
+    }
+
+    @PostMapping("/payment/failed")
+    public OrderDto paymentFailed(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.paymentFailed(orderId);
+    }
+
+    @PostMapping("/delivery")
+    public OrderDto deliveryOrder(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.deliveryOrder(orderId);
+    }
+
+    @PostMapping("/delivery/failed")
+    public OrderDto deliveryFailed(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.deliveryFailed(orderId);
+    }
+
+    @PostMapping("/completed")
+    public OrderDto completedOrder(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.completedOrder(orderId);
+    }
+
+    @PostMapping("/calculate/total")
+    public OrderDto calculateTotal(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.calculateTotal(orderId);
+    }
+
+    @PostMapping("/calculate/delivery")
+    public OrderDto calculateDelivery(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.calculateDelivery(orderId);
+    }
+
+    @PostMapping("/assembly")
+    public OrderDto orderAssembly(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.orderAssembly(orderId);
+    }
+
+    @PostMapping("/assembly/failed")
+    public OrderDto orderAssemblyFailed(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.orderAssemblyFailed(orderId);
+    }
+}

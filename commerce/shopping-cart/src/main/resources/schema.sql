@@ -1,7 +1,7 @@
 CREATE TABLE IF NOT EXISTS carts (
     cart_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
     username VARCHAR(255) NOT NULL UNIQUE,
-    is_active BOOLEAN DEAFULT TRUE
+    is_active BOOLEAN DEFAULT TRUE
 );
 
 CREATE TABLE IF NOT EXISTS cart_products (

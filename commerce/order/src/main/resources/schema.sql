@@ -12,8 +12,6 @@ CREATE TABLE IF NOT EXISTS orders (
     delivery_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     product_price DECIMAL(10, 2) NOT NULL DEFAULT 0,
     total_price DECIMAL(10, 2) GENERATED ALWAYS AS (products_price + delivery_price) STORED,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 CREATE TABLE IF NOT EXISTS order_products (
