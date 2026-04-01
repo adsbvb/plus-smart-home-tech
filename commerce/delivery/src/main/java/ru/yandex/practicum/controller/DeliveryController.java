@@ -1,5 +1,6 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.OrderDto;
@@ -11,7 +12,7 @@ import java.util.UUID;
 public class DeliveryController {
 
     @PutMapping
-    public DeliveryDto createNewDelivery(
+    public DeliveryDto createDelivery(
             @RequestBody DeliveryDto deliveryDto
     ) {
         return null;
@@ -40,7 +41,7 @@ public class DeliveryController {
 
     @PostMapping("/cost")
     public Double costDelivery(
-            @RequestBody OrderDto orderDto
+            @Valid @RequestBody OrderDto orderDto
     ) {
         return null;
     }

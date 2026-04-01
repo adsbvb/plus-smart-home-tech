@@ -1,5 +1,6 @@
 package ru.yandex.practicum.controller;
 
+import jakarta.validation.Valid;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -15,14 +16,14 @@ public class PaymentController {
 
     @PostMapping
     public PaymentDto createPaymentForOrder(
-            @RequestBody OrderDto orderDto
+            @Valid @RequestBody OrderDto orderDto
             ) {
         return null;
     }
 
     @PostMapping("/totalCost")
     public Double getTotalCostOrder(
-            @RequestBody OrderDto orderDto
+            @Valid @RequestBody OrderDto orderDto
     ) {
         return null;
     }
@@ -36,7 +37,7 @@ public class PaymentController {
 
     @PostMapping("/productCost")
     public Double getCostProductsForOrder(
-            @RequestBody OrderDto orderDto
+            @Valid @RequestBody OrderDto orderDto
     ) {
         return null;
     }

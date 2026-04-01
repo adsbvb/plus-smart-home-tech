@@ -1,10 +1,11 @@
 package ru.yandex.practicum.service;
 
-import jakarta.ws.rs.NotAuthorizedException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.dal.OrderRepository;
+import ru.yandex.practicum.dto.BookedProductsDto;
 import ru.yandex.practicum.dto.CreateNewOrderRequest;
 import ru.yandex.practicum.dto.OrderDto;
 import ru.yandex.practicum.dto.ProductReturnRequest;
@@ -24,6 +25,7 @@ public class OrderServiceImpl implements OrderService {
 
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
+    private final WarehouseClient warehouseClient;
 
     @Override
     public List<OrderDto> getUserOrders(String username) {
@@ -45,7 +47,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto createOrder(CreateNewOrderRequest request) {
-        return null;
+        BookedProductsDto bookedProducts = warehouseClient.checkProductQuantityState(request.getShoppingCartDto());
+
+        OrderEntity orderEntity = OrderEntity.builder()
+                ...
+                .build();
     }
 
     @Override

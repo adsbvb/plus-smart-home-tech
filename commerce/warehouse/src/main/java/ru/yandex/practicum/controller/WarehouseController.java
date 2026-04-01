@@ -7,6 +7,9 @@ import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.dto.*;
 import ru.yandex.practicum.service.WarehouseService;
 
+import java.util.Map;
+import java.util.UUID;
+
 @Slf4j
 @RestController
 @RequestMapping("/api/v1/warehouse")
@@ -43,5 +46,30 @@ public class WarehouseController {
     public AddressDto getWarehouseAddress() {
         log.info("WarehouseController::getWarehouseAddress");
         return warehouseService.getWarehouseAddress();
+    }
+
+    @PostMapping("/shipped")
+    public void shipToDelivery(
+            @Valid @RequestBody ShipToDeliveryRequest request
+    ) {
+        log.info("WarehouseController::shipToDelivery");
+
+    }
+
+    @PostMapping("/return")
+    public void acceptReturn(
+            @RequestBody Map<UUID, Long> products
+    ) {
+        log.info("WarehouseController::acceptReturn");
+
+    }
+
+    @PostMapping("/assembly")
+    public BookedProductsDto assemblyProductsForOrder(
+            @Valid @RequestBody AssemblyProductsForOrderRequest request
+    ) {
+        log.info("WarehouseController::assemblyOrder");
+        return null;
+
     }
 }

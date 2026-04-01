@@ -53,11 +53,7 @@ public class WarehouseServiceImpl implements WarehouseService {
         Map<UUID, Long> products = shoppingCart.getProducts();
 
         if (products == null || products.isEmpty()) {
-            return BookedProductsDto.builder()
-                    .deliveryWeight(0.0)
-                    .deliveryVolume(0.0)
-                    .fragile(false)
-                    .build();
+            throw new NoSpecifiedProductInWarehouseException("Получен пустой список продуктов");
         }
 
         List<UUID> productIds = new ArrayList<>(products.keySet());
