@@ -15,4 +15,7 @@ public class CreateNewOrderRequest {
 
     @NotNull
     AddressDto deliveryAddress;
+
+    // ????
+    String username;
 }

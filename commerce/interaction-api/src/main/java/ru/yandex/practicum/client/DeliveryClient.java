@@ -12,7 +12,7 @@ import ru.yandex.practicum.dto.OrderDto;
 public interface DeliveryClient {
 
     @PutMapping
-    public DeliveryDto createDelivery(
+    public DeliveryDto planDelivery(
             @Valid @RequestBody DeliveryDto deliveryDto);
 
     @PostMapping("/cost")

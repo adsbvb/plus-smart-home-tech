@@ -12,7 +12,7 @@ import java.util.UUID;
 public class DeliveryController {
 
     @PutMapping
-    public DeliveryDto createDelivery(
+    public DeliveryDto planDelivery(
             @RequestBody DeliveryDto deliveryDto
     ) {
         return null;

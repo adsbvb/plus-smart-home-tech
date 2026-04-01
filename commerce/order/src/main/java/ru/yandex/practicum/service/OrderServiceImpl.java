@@ -3,18 +3,20 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import ru.yandex.practicum.client.DeliveryClient;
 import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.dal.OrderRepository;
-import ru.yandex.practicum.dto.BookedProductsDto;
-import ru.yandex.practicum.dto.CreateNewOrderRequest;
-import ru.yandex.practicum.dto.OrderDto;
-import ru.yandex.practicum.dto.ProductReturnRequest;
+import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.enums.OrderState;
+import ru.yandex.practicum.exception.NoOrderFoundException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
 import ru.yandex.practicum.mapper.OrderMapper;
 import ru.yandex.practicum.model.OrderEntity;
+import ru.yandex.practicum.model.OrderProductEntity;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -26,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderRepository orderRepository;
     private final OrderMapper orderMapper;
     private final WarehouseClient warehouseClient;
+    private final DeliveryClient deliveryClient;
 
     @Override
     public List<OrderDto> getUserOrders(String username) {
@@ -47,11 +50,36 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto createOrder(CreateNewOrderRequest request) {
-        BookedProductsDto bookedProducts = warehouseClient.checkProductQuantityState(request.getShoppingCartDto());
+        BookedProductsDto bookedProducts =
+                warehouseClient.checkProductQuantityState(request.getShoppingCartDto());
 
-        OrderEntity orderEntity = OrderEntity.builder()
-                ...
+        OrderEntity createdOrder = OrderEntity.builder()
+                .username(request.getUsername())
+                .shoppingCartId(request.getShoppingCartDto().getShoppingCartId())
+                .state(OrderState.NEW)
+                .deliveryWeight(bookedProducts.getDeliveryWeight())
+                .deliveryVolume(bookedProducts.getDeliveryVolume())
+                .fragile(bookedProducts.getFragile())
                 .build();
+
+        Map<UUID, Long> requestProducts = request.getShoppingCartDto().getProducts();
+        List<OrderProductEntity> orderProducts = requestProducts.entrySet().stream()
+                .map(entry -> OrderProductEntity.builder()
+                        .order(createdOrder)
+                        .productId(entry.getKey())
+                        .quantity(entry.getValue())
+                        .build())
+                .toList();
+
+        createdOrder.setProducts(orderProducts);
+        OrderEntity savedOrder = orderRepository.save(createdOrder);
+
+        warehouseClient.assemblyProductsForOrder(AssemblyProductsForOrderRequest.builder()
+                .products(requestProducts)
+                .orderId(savedOrder.getOrderId())
+                .build());
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
@@ -96,6 +124,11 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto orderAssembly(UUID orderId) {
+        OrderEntity order = orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> new NoOrderFoundException("Заказ не найден: " + orderId));
+
+        order.setState(OrderState.ASSEMBLED);
+
         return null;
     }
 
