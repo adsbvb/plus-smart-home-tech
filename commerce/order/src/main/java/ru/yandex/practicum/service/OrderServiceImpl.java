@@ -7,6 +7,7 @@ import ru.yandex.practicum.client.DeliveryClient;
 import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.dal.OrderRepository;
 import ru.yandex.practicum.dto.*;
+import ru.yandex.practicum.enums.DeliveryState;
 import ru.yandex.practicum.enums.OrderState;
 import ru.yandex.practicum.exception.NoOrderFoundException;
 import ru.yandex.practicum.exception.NotAuthorizedUserException;
@@ -135,5 +136,15 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderDto orderAssemblyFailed(UUID orderId) {
         return null;
+    }
+
+    private DeliveryDto getDelivery(UUID orderId, AddressDto addressDto) {
+        DeliveryDto delivery = DeliveryDto.builder()
+                .fromAddress(warehouseClient.getWarehouseAddress())
+                .toAddress(addressDto)
+                .orderId(orderId)
+                .deliveryState(DeliveryState.CREATED)
+                .build();
+        return deliveryClient.planDelivery(delivery);
     }
 }

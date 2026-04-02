@@ -34,4 +34,16 @@ public class DeliveryEntity {
     @Enumerated(EnumType.STRING)
     @Column(name = "delivery_state", nullable = false, length = 20)
     private DeliveryState deliveryState;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof DeliveryEntity)) return false;
+        return deliveryId != null && deliveryId.equals(((DeliveryEntity) o).getDeliveryId());
+    }
+
+    @Override
+    public int hashCode() {
+        return getClass().hashCode();
+    }
 }
