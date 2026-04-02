@@ -15,7 +15,6 @@ import java.util.stream.Collectors;
 @Mapper(componentModel = "spring")
 public interface OrderMapper {
 
-    @Mapping(target = "username", ignore = true)
     @Mapping(target = "products", source = "products", qualifiedByName = "productsToMap")
     OrderDto toDto(OrderEntity order);
 

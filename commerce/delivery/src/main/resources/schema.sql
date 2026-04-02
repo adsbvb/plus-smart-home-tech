@@ -1,5 +1,8 @@
 CREATE TABLE IF NOT EXISTS delivery (
     delivery_id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+    delivery_volume DECIMAL(10, 2),
+    delivery_weight DECIMAL(10, 2),
+    fragile BOOLEAN DEFAULT FALSE,
     from_address_id UUID NOT NULL,
     to_address_id UUID NOT NULL,
     UUID order_id NOT NULL,

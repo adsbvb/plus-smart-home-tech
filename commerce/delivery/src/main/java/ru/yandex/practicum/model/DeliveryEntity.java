@@ -20,6 +20,14 @@ public class DeliveryEntity {
     @Column(name = "delivery_id")
     private UUID deliveryId;
 
+    @Column(name = "delivery_weight")
+    private Double deliveryWeight;
+
+    @Column(name = "delivery_volume")
+    private Double deliveryVolume;
+
+    private Boolean fragile;
+
     @ManyToOne(cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     @JoinColumn(name = "from_address_id")
     private AddressEntity fromAddress;
