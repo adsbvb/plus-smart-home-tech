@@ -16,6 +16,6 @@ public interface DeliveryClient {
             @Valid @RequestBody DeliveryDto deliveryDto);
 
     @PostMapping("/cost")
-    public Double costDelivery(
+    public Double deliveryCost(
             @Valid @RequestBody OrderDto orderDto);
 }

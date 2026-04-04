@@ -18,10 +18,10 @@ public interface WarehouseClient {
     AddressDto getWarehouseAddress();
 
     @PostMapping("/assembly")
-    BookedProductsDto assemblyProductsForOrder(
+    BookedProductsDto assemblyProductForOrderFromShoppingCart(
             @Valid @RequestBody AssemblyProductsForOrderRequest request);
 
     @PostMapping("/shipped")
-    void shipToDelivery(
+    void shippedToDelivery(
             @Valid @RequestBody ShipToDeliveryRequest request);
 }

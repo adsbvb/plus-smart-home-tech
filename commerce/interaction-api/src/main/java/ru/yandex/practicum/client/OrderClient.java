@@ -11,10 +11,18 @@ import java.util.UUID;
 public interface OrderClient {
 
     @PostMapping("/delivery")
-    OrderDto deliveryOrder(
+    OrderDto delivery(
             @RequestBody UUID orderId);
 
     @PostMapping("/delivery/failed")
     OrderDto deliveryFailed(
+            @RequestBody UUID orderId);
+
+    @PostMapping("/payment")
+    public OrderDto payment(
+            @RequestBody UUID orderId);
+
+    @PostMapping("/payment/failed")
+    public OrderDto paymentFailed(
             @RequestBody UUID orderId);
 }

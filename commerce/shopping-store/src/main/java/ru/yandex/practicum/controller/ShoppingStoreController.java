@@ -24,7 +24,7 @@ public class ShoppingStoreController {
     private final ShoppingStoreService shoppingStoreService;
 
     @GetMapping
-    public Page<ProductDto> getProducts(
+    public Page<ProductDto> getProductsByCategory(
             @RequestParam("category") ProductCategory category,
             @PageableDefault(page = 0, size = 20, sort = "productName")Pageable pageable
     ) {
@@ -65,7 +65,7 @@ public class ShoppingStoreController {
     }
 
     @GetMapping("/{productId}")
-    public ProductDto getProductById(
+    public ProductDto getProduct(
             @PathVariable("productId") UUID productId
     ) {
         return shoppingStoreService.getProductById(productId);

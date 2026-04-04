@@ -20,7 +20,7 @@ public class OrderController {
     private final OrderService orderService;
 
     @GetMapping
-    public List<OrderDto> getUserOrders(
+    public List<OrderDto> getClientOrders(
             @RequestParam String username
     ) {
         return orderService.getUserOrders(username);
@@ -41,7 +41,7 @@ public class OrderController {
     }
 
     @PostMapping("/payment")
-    public OrderDto paymentOrder(
+    public OrderDto payment(
             @RequestBody UUID orderId
     ) {
         return orderService.paymentOrder(orderId);
@@ -55,10 +55,10 @@ public class OrderController {
     }
 
     @PostMapping("/delivery")
-    public OrderDto deliveryOrder(
+    public OrderDto delivery(
             @RequestBody UUID orderId
     ) {
-        return orderService.deliveryOrder(orderId);
+        return orderService.delivery(orderId);
     }
 
     @PostMapping("/delivery/failed")
@@ -90,10 +90,10 @@ public class OrderController {
     }
 
     @PostMapping("/assembly")
-    public OrderDto orderAssembly(
+    public OrderDto assembly(
             @RequestBody UUID orderId
     ) {
-        return orderService.orderAssembly(orderId);
+        return orderService.assembly(orderId);
     }
 
     @PostMapping("/assembly/failed")

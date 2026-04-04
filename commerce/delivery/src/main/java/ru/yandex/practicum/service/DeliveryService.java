@@ -14,5 +14,5 @@ public interface DeliveryService {
 
     void failedDelivery(UUID orderId);
 
-    Double costDelivery(OrderDto orderDto);
+    Double deliveryCost(OrderDto orderDto);
 }

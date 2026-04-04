@@ -51,11 +51,11 @@ public class DeliveryController {
     }
 
     @PostMapping("/cost")
-    public Double costDelivery(
+    public Double deliveryCost(
             @Valid @RequestBody OrderDto orderDto
     ) {
         log.info("Delivery Controller: costDelivery({})", orderDto);
-        return deliveryService.costDelivery(orderDto);
+        return deliveryService.deliveryCost(orderDto);
     }
 
 

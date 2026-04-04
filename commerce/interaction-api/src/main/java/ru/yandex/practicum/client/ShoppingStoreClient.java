@@ -15,10 +15,10 @@ import java.util.UUID;
 public interface ShoppingStoreClient {
 
     @GetMapping("/{productId}")
-    ProductDto getProductById(@PathVariable("productId") UUID productId);
+    ProductDto getProduct(@PathVariable("productId") UUID productId);
 
     @GetMapping
-    Page<ProductDto> getProducts (
+    Page<ProductDto> getProductsByCategory(
             @RequestParam("category") ProductCategory category,
             @PageableDefault(page = 0, size = 20, sort = "productName") Pageable pageable);
 

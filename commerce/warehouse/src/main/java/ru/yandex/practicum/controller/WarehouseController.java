@@ -49,10 +49,10 @@ public class WarehouseController {
     }
 
     @PostMapping("/shipped")
-    public void shipToDelivery(
+    public void shippedToDelivery(
             @Valid @RequestBody ShipToDeliveryRequest request
     ) {
-        log.info("WarehouseController::shipToDelivery");
+        log.info("WarehouseController::shippedToDelivery");
 
     }
 
@@ -65,7 +65,7 @@ public class WarehouseController {
     }
 
     @PostMapping("/assembly")
-    public BookedProductsDto assemblyProductsForOrder(
+    public BookedProductsDto assemblyProductForOrderFromShoppingCart(
             @Valid @RequestBody AssemblyProductsForOrderRequest request
     ) {
         log.info("WarehouseController::assemblyOrder");

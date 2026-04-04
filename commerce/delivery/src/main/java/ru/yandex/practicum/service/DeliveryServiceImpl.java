@@ -3,6 +3,7 @@ package ru.yandex.practicum.service;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.OrderClient;
 import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.dal.DeliveryRepository;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @Slf4j
 @Service
+@Transactional(readOnly = true)
 @RequiredArgsConstructor
 public class DeliveryServiceImpl implements DeliveryService {
 
@@ -28,6 +30,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     private final OrderClient orderClient;
 
     @Override
+    @Transactional
     public DeliveryDto planDelivery(DeliveryDto deliveryRequest) {
         log.info("Планирование доставки заказа: {}", deliveryRequest.getOrderId());
 
@@ -41,18 +44,20 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public void pickedDelivery(UUID orderId) {
         log.info("Получен запрос на доставку с указанием идентификатора доставки {}", orderId);
 
         DeliveryEntity delivery = getDelivery(orderId);
 
         if (delivery.getDeliveryState() != DeliveryState.CREATED) {
-            log.warn("Забрать заказ можно только в статусе CREATED. Текущий статус: {}",
+            log.warn("Необходим статус доставки CREATED. Текущий статус: {}",
                     delivery.getDeliveryState());
-            throw new NoDeliveryFoundException("Забрать заказ можно только в статусе CREATED");
+            throw new IllegalStateException("Необходим статус доставки CREATED. Текущий статус: "
+                    + delivery.getDeliveryState());
         }
 
-        warehouseClient.shipToDelivery(ShipToDeliveryRequest.builder()
+        warehouseClient.shippedToDelivery(ShipToDeliveryRequest.builder()
                 .orderId(orderId)
                 .deliveryId(delivery.getDeliveryId())
                 .build());
@@ -60,22 +65,24 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setDeliveryState(DeliveryState.IN_PROGRESS);
         deliveryRepository.save(delivery);
 
-        log.info("Доставка заказа {} в настоящее время находится IN_PROGRESS", orderId);
+        log.info("Доставка заказа {}. В настоящее время статус IN_PROGRESS", orderId);
     }
 
     @Override
+    @Transactional
     public void successfulDelivery(UUID orderId) {
         log.info("Начало обработки successfulDelivery для заказа: {}", orderId);
 
         DeliveryEntity delivery = getDelivery(orderId);
 
         if (delivery.getDeliveryState() != DeliveryState.IN_PROGRESS) {
-            log.warn("Только доставка в статусе IN_PROGRESS может быть отмечена как успешная. Текущий статус: {}",
+            log.warn("Необходим статус доставки IN_PROGRESS. Текущий статус: {}",
                     delivery.getDeliveryState());
-            throw new NoDeliveryFoundException("Только доставка в статусе IN_PROGRESS может быть отмечена как успешная");
+            throw new IllegalStateException("Необходим статус доставки IN_PROGRESS. Текущий статус: "
+                    + delivery.getDeliveryState());
         }
 
-        orderClient.deliveryOrder(orderId);
+        orderClient.delivery(orderId);
 
         delivery.setDeliveryState(DeliveryState.DELIVERED);
         deliveryRepository.save(delivery);
@@ -84,6 +91,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
+    @Transactional
     public void failedDelivery(UUID orderId) {
         log.info("Начало обработки failedDelivery для заказа: {}", orderId);
 
@@ -98,7 +106,7 @@ public class DeliveryServiceImpl implements DeliveryService {
     }
 
     @Override
-    public Double costDelivery(OrderDto orderDto) {
+    public Double deliveryCost(OrderDto orderDto) {
         log.info("Расчет стоимости доставки заказа: {}", orderDto.getOrderId());
 
         Double weight = orderDto.getDeliveryWeight();

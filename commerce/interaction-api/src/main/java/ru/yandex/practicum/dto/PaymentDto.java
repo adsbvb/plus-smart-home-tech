@@ -14,5 +14,5 @@ public class PaymentDto {
     UUID paymentId;
     Double totalPayment;
     Double deliveryPayment;
-    Double freeTotal;
+    Double feeTotal;
 }
