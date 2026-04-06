@@ -18,8 +18,8 @@ public interface OrderClient {
     OrderDto deliveryFailed(
             @RequestBody UUID orderId);
 
-    @PostMapping("/payment")
-    public OrderDto payment(
+    @PostMapping("/payment/success")
+    public OrderDto paymentSuccess(
             @RequestBody UUID orderId);
 
     @PostMapping("/payment/failed")

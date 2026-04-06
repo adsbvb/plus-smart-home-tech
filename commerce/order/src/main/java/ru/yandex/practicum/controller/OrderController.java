@@ -47,6 +47,13 @@ public class OrderController {
         return orderService.paymentOrder(orderId);
     }
 
+    @PostMapping("/paymnet/success")
+    public OrderDto paymentSuccess(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.paymentSuccess(orderId);
+    }
+
     @PostMapping("/payment/failed")
     public OrderDto paymentFailed(
             @RequestBody UUID orderId
@@ -97,9 +104,9 @@ public class OrderController {
     }
 
     @PostMapping("/assembly/failed")
-    public OrderDto orderAssemblyFailed(
+    public OrderDto assemblyFailed(
             @RequestBody UUID orderId
     ) {
-        return orderService.orderAssemblyFailed(orderId);
+        return orderService.assemblyFailed(orderId);
     }
 }

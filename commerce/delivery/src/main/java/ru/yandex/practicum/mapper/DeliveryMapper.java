@@ -1,7 +1,6 @@
 package ru.yandex.practicum.mapper;
 
 import org.mapstruct.Mapper;
-import org.mapstruct.Mapping;
 import ru.yandex.practicum.dto.AddressDto;
 import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.model.AddressEntity;
@@ -15,8 +14,5 @@ public interface DeliveryMapper {
 
     DeliveryDto toDto(DeliveryEntity delivery);
 
-    @Mapping(target = "deliveryWeight", ignore = true)
-    @Mapping(target = "deliveryVolume", ignore = true)
-    @Mapping(target = "fragile", ignore = true)
     DeliveryEntity toEntity(DeliveryDto deliveryDto);
 }

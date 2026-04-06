@@ -113,9 +113,10 @@ public class DeliveryServiceImpl implements DeliveryService {
         Double volume = orderDto.getDeliveryVolume();
         Boolean fragile = orderDto.getFragile();
 
-        AddressDto warehouseAddress = warehouseClient.getWarehouseAddress();
+        DeliveryEntity delivery = getDelivery(orderDto.getOrderId());
 
-        AddressDto deliveryAddress = warehouseClient.getWarehouseAddress(); // !!!!!!!!!!!!!
+        AddressDto warehouseAddress = deliveryMapper.toAddressDto(delivery.getFromAddress());
+        AddressDto deliveryAddress = deliveryMapper.toAddressDto(delivery.getToAddress());
 
         // Базовая стоимость
         double cost = 5.0;

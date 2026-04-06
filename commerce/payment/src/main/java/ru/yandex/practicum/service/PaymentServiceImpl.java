@@ -114,7 +114,7 @@ public class PaymentServiceImpl implements PaymentService {
         payment.setState(PaymentState.SUCCESS);
         paymentRepository.save(payment);
 
-        orderClient.payment(payment.getOrderId());
+        orderClient.paymentSuccess(payment.getOrderId());
         log.info("Успешная оплата заказа: {}", payment.getOrderId());
     }
 

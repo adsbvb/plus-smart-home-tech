@@ -16,6 +16,8 @@ public interface OrderService {
 
     OrderDto paymentOrder(UUID orderId);
 
+    OrderDto paymentSuccess(UUID orderId);
+
     OrderDto paymentFailed(UUID orderId);
 
     OrderDto delivery(UUID orderId);
@@ -30,5 +32,5 @@ public interface OrderService {
 
     OrderDto assembly(UUID orderId);
 
-    OrderDto orderAssemblyFailed(UUID orderId);
+    OrderDto assemblyFailed(UUID orderId);
 }

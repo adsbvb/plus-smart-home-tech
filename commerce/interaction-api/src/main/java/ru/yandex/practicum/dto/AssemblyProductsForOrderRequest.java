@@ -14,8 +14,8 @@ import java.util.UUID;
 @FieldDefaults(level = AccessLevel.PRIVATE)
 public class AssemblyProductsForOrderRequest {
     @NotNull
-    Map<UUID, Long> products;
+    UUID orderId;
 
     @NotNull
-    UUID orderId;
+    Map<UUID, Long> products;
 }

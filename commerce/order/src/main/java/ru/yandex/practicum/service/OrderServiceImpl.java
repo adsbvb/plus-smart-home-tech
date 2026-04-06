@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.client.DeliveryClient;
+import ru.yandex.practicum.client.PaymentClient;
 import ru.yandex.practicum.client.WarehouseClient;
 import ru.yandex.practicum.dal.OrderRepository;
 import ru.yandex.practicum.dto.*;
@@ -32,6 +33,7 @@ public class OrderServiceImpl implements OrderService {
     private final OrderMapper orderMapper;
     private final WarehouseClient warehouseClient;
     private final DeliveryClient deliveryClient;
+    private final PaymentClient paymentClient;
 
     @Override
     public List<OrderDto> getUserOrders(String username) {
@@ -54,42 +56,28 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto createOrder(CreateNewOrderRequest request) {
         log.info("Создание нового заказа для пользователя: {}", request.getUsername());
 
         BookedProductsDto bookedProducts =
                 warehouseClient.checkProductQuantityState(request.getShoppingCartDto());
 
-        OrderEntity order = OrderEntity.builder()
-                .username(request.getUsername())
-                .shoppingCartId(request.getShoppingCartDto().getShoppingCartId())
-                .state(OrderState.NEW)
-                .deliveryWeight(bookedProducts.getDeliveryWeight())
-                .deliveryVolume(bookedProducts.getDeliveryVolume())
-                .fragile(bookedProducts.getFragile())
-                .build();
-
-        Map<UUID, Long> requestProducts = request.getShoppingCartDto().getProducts();
-        List<OrderProductEntity> orderProducts = requestProducts.entrySet().stream()
-                .map(entry -> OrderProductEntity.builder()
-                        .order(order)
-                        .productId(entry.getKey())
-                        .quantity(entry.getValue())
-                        .build())
-                .toList();
+        OrderEntity order = createOrderEntity(request, bookedProducts);
+        List<OrderProductEntity> orderProducts = getOrderProducts(request, order);
 
         order.setProducts(orderProducts);
+        orderRepository.save(order);
 
-        OrderEntity savedOrder = orderRepository.save(order);
-        log.info("Заказ создан с идентификатором: {}", savedOrder.getOrderId());
+        DeliveryDto deliveryRequest = createDeliveryDto(order.getOrderId(), request.getDeliveryAddress());
+        DeliveryDto delivery = deliveryClient.planDelivery(deliveryRequest);
 
-        warehouseClient.assemblyProductForOrderFromShoppingCart(AssemblyProductsForOrderRequest.builder()
-                .products(requestProducts)
-                .orderId(savedOrder.getOrderId())
-                .build());
-        log.info("Товар забронирован для заказа: {}", savedOrder.getOrderId());
+        order.setDeliveryId(delivery.getDeliveryId());
+        orderRepository.save(order);
 
-        return orderMapper.toDto(savedOrder);
+        log.info("Заказ создан с идентификатором: {}", order.getOrderId());
+
+        return orderMapper.toDto(order);
     }
 
     @Override
@@ -99,12 +87,61 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public OrderDto paymentOrder(UUID orderId) {
-        return null;
+        log.info("Обработка платежа по заказу:  {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        if (order.getState() != OrderState.ASSEMBLED) {
+            log.warn("Заказ {} не находится в статусе ASSEMBLED. Текущий статус: {}",
+                    orderId, order.getState());
+            throw new IllegalStateException("Заказ не находится в статусе ASSEMBLED. Текущий статус: "
+                    + order.getState());
+        }
+
+        OrderDto orderDto = orderMapper.toDto(order);
+
+        PaymentDto payment = paymentClient.payment(orderDto);
+
+        order.setPaymentId(payment.getPaymentId());
+        order.setState(OrderState.ON_PAYMENT);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Инициирован платеж по заказу: {}", savedOrder.getOrderId());
+
+        return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
+    public OrderDto paymentSuccess(UUID orderId) {
+        log.info("Получено уведомление об успешной оплате заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        if (order.getState() != OrderState.ON_PAYMENT) {
+            log.warn("Заказ {} не находится в статусе ON_PAYMENT. Текущий статус: {}",
+                    orderId, order.getState());
+            throw new IllegalStateException("Заказ не находится в статусе ON_PAYMENT. Текущий статус: "
+                    + order.getState());
+        }
+
+        order.setState(OrderState.PAID);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Изменения статуса заказа {}. Текущий статус: {}", savedOrder.getOrderId(), savedOrder.getState());
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
     public OrderDto paymentFailed(UUID orderId) {
-        return null;
+        log.info("Получено уведомление о неудачной оплате заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        order.setState(OrderState.PAYMENT_FAILED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
@@ -133,40 +170,88 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto assembly(UUID orderId) {
         log.info("Сборка заказа: {}", orderId);
 
-        OrderEntity order = orderRepository.findByOrderId(orderId)
-                .orElseThrow(() -> {
-                    log.warn("Заказ не найден: {}", orderId);
-                    return new NoOrderFoundException("Заказ не найден: " + orderId);
-                });
+        OrderEntity order = getOrderEntity(orderId);
 
-        if (order.getState() != OrderState.NEW && order.getState() != OrderState.ON_PAYMENT) {
+        if (order.getState() != OrderState.NEW) {
             log.warn("Заказ не может быть собран в состоянии: {}", order.getState());
             throw new IllegalStateException("Заказ не может быть собран в состоянии: " + order.getState());
         }
 
-        AddressDto addressDto = warehouseClient.getWarehouseAddress();
+        Map<UUID, Long> products = orderMapper.productsToMap(order.getProducts());
 
+        warehouseClient.assemblyProductForOrderFromShoppingCart(
+                AssemblyProductsForOrderRequest.builder()
+                .orderId(orderId)
+                .products(products)
+                .build());
+
+        log.info("Товар забронирован для заказа: {}", order.getOrderId());
 
         order.setState(OrderState.ASSEMBLED);
+        OrderEntity savedOrder = orderRepository.save(order);
 
-        return null;
+        log.info("Заказ {} успешно собран",  savedOrder.getOrderId());
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
-    public OrderDto orderAssemblyFailed(UUID orderId) {
-        return null;
+    @Transactional
+    public OrderDto assemblyFailed(UUID orderId) {
+        log.info("Сборка заказа {} не удалась",  orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        order.setState(OrderState.ASSEMBLY_FAILED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        return orderMapper.toDto(savedOrder);
     }
 
-    private DeliveryDto getDelivery(UUID orderId, AddressDto addressDto) {
-        DeliveryDto delivery = DeliveryDto.builder()
+    private OrderEntity getOrderEntity(UUID orderId) {
+        return orderRepository.findByOrderId(orderId)
+                .orElseThrow(() -> {
+                    log.warn("Заказ не найден: {}", orderId);
+                    return new NoOrderFoundException("Заказ не найден: " + orderId);
+                });
+    }
+
+    private OrderEntity createOrderEntity(
+            CreateNewOrderRequest request, BookedProductsDto bookedProducts
+    ) {
+        return OrderEntity.builder()
+                .username(request.getUsername())
+                .shoppingCartId(request.getShoppingCartDto().getShoppingCartId())
+                .state(OrderState.NEW)
+                .deliveryWeight(bookedProducts.getDeliveryWeight())
+                .deliveryVolume(bookedProducts.getDeliveryVolume())
+                .fragile(bookedProducts.getFragile())
+                .build();
+    }
+
+    private List<OrderProductEntity> getOrderProducts(
+            CreateNewOrderRequest request, OrderEntity order
+    ) {
+        Map<UUID, Long> requestProducts = request.getShoppingCartDto().getProducts();
+        return requestProducts.entrySet().stream()
+                .map(entry -> OrderProductEntity.builder()
+                        .order(order)
+                        .productId(entry.getKey())
+                        .quantity(entry.getValue())
+                        .build())
+                .toList();
+    }
+
+    private DeliveryDto createDeliveryDto(UUID orderId, AddressDto addressDto) {
+        return DeliveryDto.builder()
                 .fromAddress(warehouseClient.getWarehouseAddress())
                 .toAddress(addressDto)
                 .orderId(orderId)
                 .deliveryState(DeliveryState.CREATED)
                 .build();
-        return deliveryClient.planDelivery(delivery);
     }
 }
