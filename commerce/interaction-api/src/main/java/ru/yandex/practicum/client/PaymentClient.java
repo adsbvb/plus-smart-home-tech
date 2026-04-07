@@ -11,11 +11,11 @@ import ru.yandex.practicum.dto.PaymentDto;
 public interface PaymentClient {
 
     @PostMapping
-    public PaymentDto payment(
+    PaymentDto payment(
             @Valid @RequestBody OrderDto orderDto);
 
     @PostMapping("/totalCost")
-    public Double getTotalCost(
+    Double getTotalCost(
             @Valid @RequestBody OrderDto orderDto);
 
     @PostMapping("/productCost")

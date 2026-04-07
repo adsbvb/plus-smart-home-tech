@@ -16,8 +16,12 @@ import ru.yandex.practicum.exception.NotEnoughInfoInOrderToCalculateException;
 import ru.yandex.practicum.mapper.PaymentMapper;
 import ru.yandex.practicum.model.PaymentEntity;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -37,10 +41,20 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentDto payment(OrderDto order) {
         log.info("Создание платежной системы для заказа: {}", order.getOrderId());
 
-        Double productCost = productCost(order);
-        Double totalCost = getTotalCost(order);
+        if (order.getProductPrice() == null) {
+            log.error("Цена товара для заказа не указана: {}", order.getOrderId());
+            throw new IllegalArgumentException("Цена товара для заказа не указана");
+        }
+
+        if (order.getDeliveryPrice() == null) {
+            log.error("Стоимость доставки для заказа не указана: {}", order.getOrderId());
+            throw new IllegalArgumentException("Стоимость доставки для заказа не указана");
+        }
+
+        Double productCost = order.getProductPrice();
         Double deliveryCost = order.getDeliveryPrice();
         Double feeTotal = productCost * TAX_RATE;
+        Double totalCost = productCost + feeTotal + deliveryCost;
 
         PaymentEntity payment = PaymentEntity.builder()
                 .orderId(order.getOrderId())
@@ -68,14 +82,23 @@ public class PaymentServiceImpl implements PaymentService {
 
         double totalProductCost = 0.0;
 
+        List<UUID> productsIds = new ArrayList<>(order.getProducts().keySet());
+        List<ProductDto> products = shoppingStoreClient.getProducts(productsIds);
+
+        Map<UUID, ProductDto> productsMap = products.stream()
+                .collect(Collectors.toMap(
+                        ProductDto::getProductId,
+                        Function.identity()
+                ));
+
         for (Map.Entry<UUID, Long> entry : order.getProducts().entrySet()) {
             UUID productId = entry.getKey();
             Long quantity = entry.getValue();
 
-            ProductDto product = shoppingStoreClient.getProduct(productId);
+            ProductDto product = productsMap.get(productId);
 
-            if(product == null || product.getPrice() == null) {
-                log.warn("Товар не найден или не имеет цены: {}", productId);
+            if (product == null || product.getPrice() == null) {
+                log.error("Товар не найден или не имеет цены: {}", productId);
                 throw new NotEnoughInfoInOrderToCalculateException("Товар не найден или не имеет цены");
             }
 
@@ -89,7 +112,11 @@ public class PaymentServiceImpl implements PaymentService {
     public Double getTotalCost(OrderDto order) {
         log.info("Расчет итоговой стоимости заказа: {}", order.getOrderId());
 
-        Double productCost = productCost(order);
+        Double productCost = order.getProductPrice();
+        if (productCost == null) {
+            productCost = productCost(order);
+        }
+
         Double feeTotal = productCost * TAX_RATE;
         Double deliveryCost = order.getDeliveryPrice();
 
@@ -97,7 +124,7 @@ public class PaymentServiceImpl implements PaymentService {
             deliveryCost = 0.0;
         }
 
-        Double totalCost =  productCost + feeTotal + deliveryCost;
+        Double totalCost = productCost + feeTotal + deliveryCost;
 
         log.info("Итоговая стоимость: product={}, delivery={}, tax={}, total={}",
                 productCost, deliveryCost, feeTotal, totalCost);

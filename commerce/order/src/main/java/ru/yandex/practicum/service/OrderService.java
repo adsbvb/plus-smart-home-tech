@@ -22,9 +22,11 @@ public interface OrderService {
 
     OrderDto delivery(UUID orderId);
 
+    OrderDto deliverySuccess(UUID orderId);
+
     OrderDto deliveryFailed(UUID orderId);
 
-    OrderDto completedOrder(UUID orderId);
+    OrderDto complete(UUID orderId);
 
     OrderDto calculateTotal(UUID orderId);
 

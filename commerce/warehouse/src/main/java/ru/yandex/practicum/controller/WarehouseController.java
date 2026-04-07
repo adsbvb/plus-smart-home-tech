@@ -53,7 +53,7 @@ public class WarehouseController {
             @Valid @RequestBody ShipToDeliveryRequest request
     ) {
         log.info("WarehouseController::shippedToDelivery");
-
+        warehouseService.shippedToDelivery(request);
     }
 
     @PostMapping("/return")
@@ -61,7 +61,7 @@ public class WarehouseController {
             @RequestBody Map<UUID, Long> products
     ) {
         log.info("WarehouseController::acceptReturn");
-
+        warehouseService.acceptReturn(products);
     }
 
     @PostMapping("/assembly")
@@ -69,7 +69,6 @@ public class WarehouseController {
             @Valid @RequestBody AssemblyProductsForOrderRequest request
     ) {
         log.info("WarehouseController::assemblyOrder");
-        return null;
-
+        return warehouseService.assemblyProductForOrder(request);
     }
 }

@@ -24,6 +24,7 @@ public class CartEntity {
     private String username;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "cart",

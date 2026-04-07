@@ -65,7 +65,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setDeliveryState(DeliveryState.IN_PROGRESS);
         deliveryRepository.save(delivery);
 
-        log.info("Доставка заказа {}. В настоящее время статус IN_PROGRESS", orderId);
+        log.info("Статус доставки {} изменен на IN_PROGRESS", delivery.getDeliveryId());
     }
 
     @Override
@@ -82,12 +82,12 @@ public class DeliveryServiceImpl implements DeliveryService {
                     + delivery.getDeliveryState());
         }
 
-        orderClient.delivery(orderId);
+        orderClient.deliverySuccess(orderId);
 
         delivery.setDeliveryState(DeliveryState.DELIVERED);
         deliveryRepository.save(delivery);
 
-        log.info("Доставка заказа {} успешно завершена",  orderId);
+        log.info("Доставка {} успешно завершена",  delivery.getDeliveryId());
     }
 
     @Override
@@ -102,7 +102,7 @@ public class DeliveryServiceImpl implements DeliveryService {
         delivery.setDeliveryState(DeliveryState.FAILED);
         deliveryRepository.save(delivery);
 
-        log.info("Статус доставки успешно изменен на FAILED для заказа: {}", orderId);
+        log.info("Статус доставки {} успешно изменен на FAILED", delivery.getDeliveryId());
     }
 
     @Override

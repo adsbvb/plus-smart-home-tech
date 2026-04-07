@@ -8,14 +8,20 @@ import org.springframework.web.bind.annotation.RequestBody;
 import ru.yandex.practicum.dto.DeliveryDto;
 import ru.yandex.practicum.dto.OrderDto;
 
+import java.util.UUID;
+
 @FeignClient(name = "delivery", path = "/api/v1/delivery")
 public interface DeliveryClient {
 
     @PutMapping
-    public DeliveryDto planDelivery(
+    DeliveryDto planDelivery(
             @Valid @RequestBody DeliveryDto deliveryDto);
 
     @PostMapping("/cost")
-    public Double deliveryCost(
+    Double deliveryCost(
             @Valid @RequestBody OrderDto orderDto);
+
+    @PostMapping("/picked")
+    void pickedDelivery(
+            @RequestBody UUID orderId);
 }

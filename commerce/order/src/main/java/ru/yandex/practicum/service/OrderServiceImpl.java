@@ -81,11 +81,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDto returnOrder(ProductReturnRequest request) {
-        return null;
-    }
-
-    @Override
+    @Transactional
     public OrderDto paymentOrder(UUID orderId) {
         log.info("Обработка платежа по заказу:  {}", orderId);
 
@@ -100,10 +96,20 @@ public class OrderServiceImpl implements OrderService {
 
         OrderDto orderDto = orderMapper.toDto(order);
 
+        Double deliveryPrice = deliveryClient.deliveryCost(orderDto);
+        Double productPrice = paymentClient.productsCost(orderDto);
+
+        orderDto.setDeliveryPrice(deliveryPrice);
+        orderDto.setProductPrice(productPrice);
+
         PaymentDto payment = paymentClient.payment(orderDto);
 
         order.setPaymentId(payment.getPaymentId());
+        order.setProductPrice(productPrice);
+        order.setDeliveryPrice(deliveryPrice);
+        order.setTotalPrice(payment.getTotalPayment());
         order.setState(OrderState.ON_PAYMENT);
+
         OrderEntity savedOrder = orderRepository.save(order);
 
         log.info("Инициирован платеж по заказу: {}", savedOrder.getOrderId());
@@ -112,6 +118,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto paymentSuccess(UUID orderId) {
         log.info("Получено уведомление об успешной оплате заказа: {}", orderId);
 
@@ -120,6 +127,11 @@ public class OrderServiceImpl implements OrderService {
         if (order.getState() != OrderState.ON_PAYMENT) {
             log.warn("Заказ {} не находится в статусе ON_PAYMENT. Текущий статус: {}",
                     orderId, order.getState());
+
+            if (order.getState() == OrderState.PAID) {
+                return orderMapper.toDto(order);
+            }
+
             throw new IllegalStateException("Заказ не находится в статусе ON_PAYMENT. Текущий статус: "
                     + order.getState());
         }
@@ -127,12 +139,13 @@ public class OrderServiceImpl implements OrderService {
         order.setState(OrderState.PAID);
         OrderEntity savedOrder = orderRepository.save(order);
 
-        log.info("Изменения статуса заказа {}. Текущий статус: {}", savedOrder.getOrderId(), savedOrder.getState());
+        log.info("Изменение статуса заказа {}. Текущий статус: {}", savedOrder.getOrderId(), savedOrder.getState());
 
         return orderMapper.toDto(savedOrder);
     }
 
     @Override
+    @Transactional
     public OrderDto paymentFailed(UUID orderId) {
         log.info("Получено уведомление о неудачной оплате заказа: {}", orderId);
 
@@ -145,28 +158,124 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
+    @Transactional
     public OrderDto delivery(UUID orderId) {
-        return null;
+        log.info("Передача заказа {} в службу доставки",  orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        if (order.getState() != OrderState.PAID) {
+            log.warn("Доставка невозможна. Заказ находиться в статусе: {}", order.getState());
+            throw new IllegalStateException("Доставка невозможна. Заказ находиться в статуск: " + order.getState());
+        }
+
+        deliveryClient.pickedDelivery(orderId);
+
+        order.setState(OrderState.ON_DELIVERY);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Статус заказа {} изменен на {}",  savedOrder.getOrderId(), savedOrder.getState());
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
+    @Transactional
+    public OrderDto deliverySuccess(UUID orderId) {
+        log.info("Получено уведомление об удачной доставке заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        if (order.getState() != OrderState.ON_DELIVERY) {
+            log.warn("Заказ {} не находится в статусе ON_DELIVERY. Текущий статус: {}",
+                    orderId, order.getState());
+            throw new IllegalStateException("Заказ не находится в статусе ON_DELIVERY. Текущий статус: "
+                    + order.getState());
+        }
+
+        order.setState(OrderState.DELIVERED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Заказ {} успешно доставлен", savedOrder.getOrderId());
+
+        return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
+    @Transactional
     public OrderDto deliveryFailed(UUID orderId) {
-        return null;
+        log.info("Получено уведомление о неудачной доставке заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        order.setState(OrderState.DELIVERY_FAILED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
-    public OrderDto completedOrder(UUID orderId) {
-        return null;
+    @Transactional
+    public OrderDto complete(UUID orderId) {
+        log.info("Завершение заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+
+        if (order.getState() != OrderState.PAID && order.getState() != OrderState.DELIVERED) {
+            log.warn("Заказ {} не может быть завершен в статусе {}",
+                    orderId, order.getState());
+            throw new IllegalStateException("Заказ не может быть завершен в статусе " + order.getState());
+        }
+
+        order.setState(OrderState.COMPLETED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Заказ {} успешно завершен", savedOrder.getOrderId());
+
+        return orderMapper.toDto(savedOrder);
+    }
+
+    @Override
+    @Transactional
+    public OrderDto returnOrder(ProductReturnRequest request) {
+        log.info("Оформление возврата заказа: {}", request.getOrderId());
+
+        OrderEntity order = getOrderEntity(request.getOrderId());
+
+        warehouseClient.acceptReturn(request.getProducts());
+
+        order.setState(OrderState.PRODUCT_RETURNED);
+        OrderEntity savedOrder = orderRepository.save(order);
+
+        log.info("Статус заказа {} изменен на {}", savedOrder.getOrderId(), savedOrder.getState());
+
+        return orderMapper.toDto(savedOrder);
     }
 
     @Override
     public OrderDto calculateTotal(UUID orderId) {
-        return null;
+        log.info("Запрос для получения итоговой суммы заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+        OrderDto orderDto = orderMapper.toDto(order);
+
+        Double totalCost = paymentClient.getTotalCost(orderDto);
+        orderDto.setTotalPrice(totalCost);
+
+        return orderDto;
     }
 
     @Override
     public OrderDto calculateDelivery(UUID orderId) {
-        return null;
+        log.info("Запрос на получения стоимости доставки для заказа: {}", orderId);
+
+        OrderEntity order = getOrderEntity(orderId);
+        OrderDto orderDto = orderMapper.toDto(order);
+
+        Double deliveryPrice = deliveryClient.deliveryCost(orderDto);
+        orderDto.setDeliveryPrice(deliveryPrice);
+
+        return orderDto;
     }
 
     @Override

@@ -10,8 +10,8 @@ import java.util.UUID;
 @FeignClient(name = "order", path = "/api/v1/order")
 public interface OrderClient {
 
-    @PostMapping("/delivery")
-    OrderDto delivery(
+    @PostMapping("/delivery/success")
+    OrderDto deliverySuccess(
             @RequestBody UUID orderId);
 
     @PostMapping("/delivery/failed")
@@ -19,10 +19,10 @@ public interface OrderClient {
             @RequestBody UUID orderId);
 
     @PostMapping("/payment/success")
-    public OrderDto paymentSuccess(
+    OrderDto paymentSuccess(
             @RequestBody UUID orderId);
 
     @PostMapping("/payment/failed")
-    public OrderDto paymentFailed(
+    OrderDto paymentFailed(
             @RequestBody UUID orderId);
 }

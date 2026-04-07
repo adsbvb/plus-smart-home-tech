@@ -11,6 +11,7 @@ import ru.yandex.practicum.enums.ProductState;
 import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.model.ProductEntity;
 
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -31,4 +32,6 @@ public interface ProductRepository extends JpaRepository<ProductEntity,Integer> 
             @Param("quantityState") QuantityState quantityState);
 
     Page<ProductEntity> findByProductCategory(ProductCategory category, Pageable pageable);
+
+    List<ProductEntity> findProductsByProductIdIn(List<UUID> productIds);
 }

@@ -68,6 +68,13 @@ public class OrderController {
         return orderService.delivery(orderId);
     }
 
+    @PostMapping("/delivery/success")
+    public OrderDto deliverySuccess(
+            @RequestBody UUID orderId
+    ) {
+        return orderService.deliverySuccess(orderId);
+    }
+
     @PostMapping("/delivery/failed")
     public OrderDto deliveryFailed(
             @RequestBody UUID orderId
@@ -76,10 +83,10 @@ public class OrderController {
     }
 
     @PostMapping("/completed")
-    public OrderDto completedOrder(
+    public OrderDto complete(
             @RequestBody UUID orderId
     ) {
-        return orderService.completedOrder(orderId);
+        return orderService.complete(orderId);
     }
 
     @PostMapping("/calculate/total")
