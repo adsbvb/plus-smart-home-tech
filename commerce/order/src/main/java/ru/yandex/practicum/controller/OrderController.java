@@ -23,6 +23,7 @@ public class OrderController {
     public List<OrderDto> getClientOrders(
             @RequestParam String username
     ) {
+        log.info("GET client orders: {}", username);
         return orderService.getUserOrders(username);
     }
 
@@ -30,6 +31,7 @@ public class OrderController {
     public OrderDto createOrder(
             @RequestBody CreateNewOrderRequest request
     ) {
+        log.info("POST create order");
         return orderService.createOrder(request);
     }
 
@@ -37,6 +39,7 @@ public class OrderController {
     public OrderDto returnOrder(
             @RequestBody ProductReturnRequest request
     ) {
+        log.info("POST return order");
         return orderService.returnOrder(request);
     }
 
@@ -44,6 +47,7 @@ public class OrderController {
     public OrderDto payment(
             @RequestBody UUID orderId
     ) {
+        log.info("POST payment order: {}", orderId);
         return orderService.paymentOrder(orderId);
     }
 
@@ -51,6 +55,7 @@ public class OrderController {
     public OrderDto paymentSuccess(
             @RequestBody UUID orderId
     ) {
+        log.info("POST payment success order: {}", orderId);
         return orderService.paymentSuccess(orderId);
     }
 
@@ -58,6 +63,7 @@ public class OrderController {
     public OrderDto paymentFailed(
             @RequestBody UUID orderId
     ) {
+        log.info("POST payment failed order: {}", orderId);
         return orderService.paymentFailed(orderId);
     }
 
@@ -65,6 +71,7 @@ public class OrderController {
     public OrderDto delivery(
             @RequestBody UUID orderId
     ) {
+        log.info("POST delivery order: {}", orderId);
         return orderService.delivery(orderId);
     }
 
@@ -72,6 +79,7 @@ public class OrderController {
     public OrderDto deliverySuccess(
             @RequestBody UUID orderId
     ) {
+        log.info("POST delivery success order : {}", orderId);
         return orderService.deliverySuccess(orderId);
     }
 
@@ -79,6 +87,7 @@ public class OrderController {
     public OrderDto deliveryFailed(
             @RequestBody UUID orderId
     ) {
+        log.info("POST delivery failed order: {}", orderId);
         return orderService.deliveryFailed(orderId);
     }
 
@@ -86,6 +95,7 @@ public class OrderController {
     public OrderDto complete(
             @RequestBody UUID orderId
     ) {
+        log.info("POST complete order: {}", orderId);
         return orderService.complete(orderId);
     }
 
@@ -93,6 +103,7 @@ public class OrderController {
     public OrderDto calculateTotal(
             @RequestBody UUID orderId
     ) {
+        log.info("POST calculate total order: {}", orderId);
         return orderService.calculateTotal(orderId);
     }
 
@@ -100,6 +111,7 @@ public class OrderController {
     public OrderDto calculateDelivery(
             @RequestBody UUID orderId
     ) {
+        log.info("POST calculate delivery order: {}", orderId);
         return orderService.calculateDelivery(orderId);
     }
 
@@ -107,6 +119,7 @@ public class OrderController {
     public OrderDto assembly(
             @RequestBody UUID orderId
     ) {
+        log.info("POST assembly order: {}", orderId);
         return orderService.assembly(orderId);
     }
 
@@ -114,6 +127,7 @@ public class OrderController {
     public OrderDto assemblyFailed(
             @RequestBody UUID orderId
     ) {
+        log.info("POST assembly failed order: {}", orderId);
         return orderService.assemblyFailed(orderId);
     }
 }

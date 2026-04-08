@@ -22,16 +22,4 @@ public class AddressEntity {
     private String street;
     private String house;
     private String flat;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof AddressEntity)) return false;
-        return id != null && id.equals(((AddressEntity) o).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

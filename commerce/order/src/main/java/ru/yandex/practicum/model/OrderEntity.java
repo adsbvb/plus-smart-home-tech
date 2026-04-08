@@ -55,23 +55,11 @@ public class OrderEntity {
     private Boolean fragile;
 
     @Column(name = "total_price")
-    Double totalPrice;
+    private Double totalPrice;
 
     @Column(name = "delivery_price")
-    Double deliveryPrice;
+    private Double deliveryPrice;
 
     @Column(name = "product_price")
-    Double productPrice;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof OrderEntity)) return false;
-        return orderId != null && orderId.equals(((OrderEntity) o).getOrderId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
+    private Double productPrice;
 }

@@ -39,16 +39,4 @@ public class PaymentEntity {
     @Column(name = "payment_state")
     @Builder.Default
     private PaymentState state = PaymentState.PENDING;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof PaymentEntity)) return false;
-        return paymentId != null && paymentId.equals(((PaymentEntity) o).getPaymentId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

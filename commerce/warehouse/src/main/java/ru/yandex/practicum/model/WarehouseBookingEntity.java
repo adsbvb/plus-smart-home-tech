@@ -36,17 +36,5 @@ public class WarehouseBookingEntity {
 
     @Column(name = "shipped_at")
     private LocalDateTime shippedAt;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof WarehouseBookingEntity)) return false;
-        return bookingId != null && bookingId.equals(((WarehouseBookingEntity) o).getBookingId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
 

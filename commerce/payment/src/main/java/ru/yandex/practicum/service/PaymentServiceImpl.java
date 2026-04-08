@@ -104,7 +104,7 @@ public class PaymentServiceImpl implements PaymentService {
 
             totalProductCost += product.getPrice() * quantity;
         }
-        log.info("Общая стоимость продукции: {}", totalProductCost);
+        log.info("По заказу {} стоимость продукции: {}", order.getOrderId(), totalProductCost);
         return totalProductCost;
     }
 
@@ -126,8 +126,8 @@ public class PaymentServiceImpl implements PaymentService {
 
         Double totalCost = productCost + feeTotal + deliveryCost;
 
-        log.info("Итоговая стоимость: product={}, delivery={}, tax={}, total={}",
-                productCost, deliveryCost, feeTotal, totalCost);
+        log.info("По заказу {} итоговая стоимость: product={}, delivery={}, tax={}, total={}",
+                order.getOrderId(), productCost, deliveryCost, feeTotal, totalCost);
         return totalCost;
     }
 

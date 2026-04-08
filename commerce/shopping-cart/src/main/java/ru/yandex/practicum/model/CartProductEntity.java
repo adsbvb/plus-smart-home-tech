@@ -28,16 +28,4 @@ public class CartProductEntity {
 
     @Column(nullable = false)
     private Long quantity;
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CartProductEntity)) return false;
-        return id != null && id.equals(((CartProductEntity) o).getId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

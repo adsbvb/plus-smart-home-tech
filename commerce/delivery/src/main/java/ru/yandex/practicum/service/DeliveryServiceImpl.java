@@ -141,7 +141,7 @@ public class DeliveryServiceImpl implements DeliveryService {
             cost += cost * 0.2;
         }
 
-        log.info("Итоговая стоимость доставки: {}", cost);
+        log.info("Стоимость доставки заказа {} итого: {}", orderDto.getOrderId(), cost);
         return cost;
     }
 
