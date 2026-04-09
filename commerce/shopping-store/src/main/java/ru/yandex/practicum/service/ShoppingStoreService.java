@@ -6,6 +6,7 @@ import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.dto.SetProductQuantityStateRequest;
 import ru.yandex.practicum.enums.ProductCategory;
 
+import java.util.List;
 import java.util.UUID;
 
 public interface ShoppingStoreService {
@@ -20,4 +21,6 @@ public interface ShoppingStoreService {
     boolean updateQuantityState(SetProductQuantityStateRequest request);
 
     ProductDto getProductById(UUID productId);
+
+    List<ProductDto> getProductsBatch(List<UUID> productIds);
 }

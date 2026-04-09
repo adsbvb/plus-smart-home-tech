@@ -9,16 +9,17 @@ import ru.yandex.practicum.dto.ProductDto;
 import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.QuantityState;
 
+import java.util.List;
 import java.util.UUID;
 
 @FeignClient(name = "shopping-store", path = "/api/v1/shopping-store")
 public interface ShoppingStoreClient {
 
     @GetMapping("/{productId}")
-    ProductDto getProductById(@PathVariable("productId") UUID productId);
+    ProductDto getProduct(@PathVariable("productId") UUID productId);
 
     @GetMapping
-    Page<ProductDto> getProducts (
+    Page<ProductDto> getProductsByCategory(
             @RequestParam("category") ProductCategory category,
             @PageableDefault(page = 0, size = 20, sort = "productName") Pageable pageable);
 
@@ -27,4 +28,8 @@ public interface ShoppingStoreClient {
             @RequestParam UUID productId,
             @RequestParam QuantityState quantityState
     );
+
+    @GetMapping("/batch")
+    List<ProductDto> getProducts(
+            @RequestBody List<UUID> productIds);
 }

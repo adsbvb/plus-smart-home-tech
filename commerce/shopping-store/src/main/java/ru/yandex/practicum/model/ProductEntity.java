@@ -61,16 +61,4 @@ public class ProductEntity {
     protected void onUpdate() {
         updatedAt = LocalDateTime.now();
     }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof ProductEntity)) return false;
-        return productId != null && productId.equals(((ProductEntity) o).getProductId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

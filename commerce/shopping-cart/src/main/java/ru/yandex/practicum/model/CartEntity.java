@@ -24,6 +24,7 @@ public class CartEntity {
     private String username;
 
     @Column(name = "is_active")
+    @Builder.Default
     private Boolean isActive = true;
 
     @OneToMany(mappedBy = "cart",
@@ -33,16 +34,4 @@ public class CartEntity {
     @ToString.Exclude
     @Builder.Default
     private List<CartProductEntity> products = new ArrayList<>();
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof CartEntity)) return false;
-        return cartId != null && cartId.equals(((CartEntity) o).getCartId());
-    }
-
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }

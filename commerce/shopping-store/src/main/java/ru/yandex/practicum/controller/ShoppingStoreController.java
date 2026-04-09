@@ -13,6 +13,7 @@ import ru.yandex.practicum.enums.ProductCategory;
 import ru.yandex.practicum.enums.QuantityState;
 import ru.yandex.practicum.service.ShoppingStoreService;
 
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -24,7 +25,7 @@ public class ShoppingStoreController {
     private final ShoppingStoreService shoppingStoreService;
 
     @GetMapping
-    public Page<ProductDto> getProducts(
+    public Page<ProductDto> getProductsByCategory(
             @RequestParam("category") ProductCategory category,
             @PageableDefault(page = 0, size = 20, sort = "productName")Pageable pageable
     ) {
@@ -65,10 +66,17 @@ public class ShoppingStoreController {
     }
 
     @GetMapping("/{productId}")
-    public ProductDto getProductById(
+    public ProductDto getProduct(
             @PathVariable("productId") UUID productId
     ) {
         return shoppingStoreService.getProductById(productId);
+    }
+
+    @GetMapping("/batch")
+    public List<ProductDto> getProducts(
+            @RequestBody List<UUID> productIds
+    ) {
+        return shoppingStoreService.getProductsBatch(productIds);
     }
 
 }

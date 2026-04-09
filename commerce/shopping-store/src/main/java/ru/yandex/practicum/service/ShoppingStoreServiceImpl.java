@@ -14,6 +14,7 @@ import ru.yandex.practicum.exception.ProductNotFoundException;
 import ru.yandex.practicum.mapper.ProductMapper;
 import ru.yandex.practicum.model.ProductEntity;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -87,6 +88,19 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
                 .orElseThrow(() -> new ProductNotFoundException(
                         "Продукт не найден с id: " + productId));
         return  productMapper.toDto(product);
+    }
+
+    @Override
+    public List<ProductDto> getProductsBatch(List<UUID> productIds) {
+        List<ProductDto> products = productRepository.findProductsByProductIdIn(productIds).stream()
+                .map(productMapper::toDto)
+                .toList();
+
+        if (products.size() != productIds.size()) {
+            throw new ProductNotFoundException("Не все продукты были найдены");
+        }
+
+        return products;
     }
 
     private boolean existProduct(UUID productId) {
